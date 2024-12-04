@@ -2,11 +2,13 @@
   import { IconPlus, IconSearch } from "@tabler/icons-svelte";
   import ProjectCard from "$lib/components/ProjectCard.svelte";
   import FAB from "$lib/components/FAB.svelte";
+  import Modal from "$lib/components/Modal.svelte";
+  import { getProjects, addProject, type Project } from "$lib/db/migrations";
+
   let searchQuery = $state("");
-  let projects = $state([
-    { name: "Web Design Project", hours: 5.34 },
-    { name: "Blindr Project", hours: 23.19 },
-  ]);
+  let projects = $state<Project[]>([]);
+  let isModalOpen = $state(false);
+  let newProjectName = $state("");
 
   let filteredProjects = $derived(
     projects.filter((project) =>
@@ -14,9 +16,21 @@
     )
   );
 
-  const addProject = () => {
-    projects = [...projects, { name: "New Project", hours: 0 }];
+  const loadProjects = async () => {
+    projects = await getProjects();
   };
+
+  const handleAddProject = async () => {
+    if (!newProjectName.trim()) return;
+    await addProject(newProjectName);
+    await loadProjects();
+    newProjectName = "";
+    isModalOpen = false;
+  };
+
+  $effect(() => {
+    loadProjects();
+  });
 </script>
 
 <div class="container">
@@ -35,11 +49,26 @@
 
   <div class="projects-grid">
     {#each filteredProjects as project}
-      <ProjectCard name={project.name} hours={project.hours} />
+      <ProjectCard name={project.name} hours={project.seconds / 3600} />
     {/each}
   </div>
 
-  <FAB icon={IconPlus} onclick={addProject} />
+  <FAB icon={IconPlus} onclick={() => (isModalOpen = true)} />
+
+  <Modal
+    title="New Project"
+    isOpen={isModalOpen}
+    onClose={() => (isModalOpen = false)}
+    onConfirm={handleAddProject}
+    confirmText="Create"
+  >
+    <input
+      type="text"
+      placeholder="Enter project name"
+      bind:value={newProjectName}
+      class="project-name-input"
+    />
+  </Modal>
 </div>
 
 <style lang="scss">
@@ -81,6 +110,7 @@
       color: var(--text-color);
       font-size: 1rem;
       outline: none;
+      width: 100%;
 
       &::placeholder {
         color: rgba(244, 244, 244, 0.5);
@@ -88,30 +118,23 @@
     }
   }
 
-  .fab {
-    position: fixed;
-    bottom: 6.5rem;
-    right: 2rem;
-    width: 3.5rem;
-    height: 3.5rem;
-    border-radius: 50%;
-    background-color: #2a9d8f;
-    color: white;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  .project-name-input {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--surface-color);
+    border: 1px solid var(--surface-border-color);
+    border-radius: 0.25rem;
+    color: var(--text-color);
+    font-size: 1rem;
+    outline: none;
+    box-sizing: border-box;
 
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(42, 157, 143, 0.2);
+    &:focus {
+      border-color: #2a9d8f;
     }
 
-    &:active {
-      transform: translateY(0);
+    &::placeholder {
+      color: rgba(244, 244, 244, 0.5);
     }
   }
 </style>
