@@ -54,6 +54,7 @@
     justify-content: center;
     position: relative;
     z-index: 1;
+    view-transition-name: bottom-bar;
 
     .container {
       width: 100%;
