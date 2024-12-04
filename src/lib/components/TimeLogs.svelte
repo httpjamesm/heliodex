@@ -4,6 +4,7 @@
   import { fade, slide } from "svelte/transition";
   import TimeLogDrawer from "./TimeLogDrawer.svelte";
   import { deleteTimeLog } from "$lib/db/migrations";
+  import { formatSeconds } from "$lib/utils/time";
 
   let {
     logs,
@@ -65,7 +66,7 @@
               {new Date(log.end_time).toLocaleTimeString("en-GB")}
             </div>
             <div class="log-duration">
-              {Math.floor((log.end_time - log.start_time) / 1000)}s
+              {formatSeconds((log.end_time - log.start_time) / 1000)}
             </div>
           </div>
         {/each}
