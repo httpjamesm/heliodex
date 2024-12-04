@@ -14,10 +14,21 @@
     title: string;
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: () => void;
+    onConfirm: () => void | Promise<void>;
     confirmText?: string;
     children: Snippet;
   } = $props();
+
+  let isLoading = $state(false);
+
+  const handleConfirm = async () => {
+    isLoading = true;
+    try {
+      await onConfirm();
+    } finally {
+      isLoading = false;
+    }
+  };
 </script>
 
 {#if isOpen}
@@ -34,9 +45,14 @@
       </div>
       <div class="modal-actions">
         <button class="cancel" onclick={onClose}>Cancel</button>
-        <button class="confirm" onclick={onConfirm}
-          >{confirmText ?? "Confirm"}</button
-        >
+        <button class="confirm" onclick={handleConfirm} disabled={isLoading}>
+          <span>
+            {confirmText ?? "Confirm"}
+          </span>
+          {#if isLoading}
+            <div class="spinner"></div>
+          {/if}
+        </button>
       </div>
     </div>
   </div>
@@ -118,6 +134,11 @@
       cursor: pointer;
       transition: all 0.2s ease;
 
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+
       &.cancel {
         background: none;
         border: 1px solid var(--surface-border-color);
@@ -132,11 +153,44 @@
         background-color: #2a9d8f;
         border: none;
         color: white;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
 
         &:hover {
           background-color: #238b7e;
         }
       }
+    }
+  }
+
+  .primary {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid white;
+    border-top: 2px solid #b8b8b8;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
     }
   }
 </style>

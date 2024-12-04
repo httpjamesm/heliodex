@@ -39,11 +39,6 @@
         throw new Error("No file selected");
       }
 
-      // check file name
-      if (!filePath.endsWith(".csv")) {
-        throw new Error("File must have a .csv extension");
-      }
-
       const fileContent = await readTextFile(filePath);
       const lines = fileContent.trim().split("\n");
 
@@ -72,11 +67,11 @@
         if (projects.has(project)) {
           projectId = projects.get(project)!;
         } else {
-          const result = await db.execute(
-            "INSERT INTO projects (name) VALUES ($1)",
+          const [result] = await db.select<[{ id: number }]>(
+            "INSERT INTO projects (name) VALUES ($1) RETURNING id",
             [project]
           );
-          projectId = result.lastInsertId;
+          projectId = result.id;
           projects.set(project, projectId);
         }
 
@@ -96,11 +91,13 @@
   const handleExport = async () => {
     try {
       const db = getDb();
-      const timeLogs = await db.select<{
+      type TimeLogExport = {
         project_name: string;
         start_time: number;
         end_time: number;
-      }>(
+      };
+
+      const logs = await db.select<TimeLogExport[]>(
         `SELECT p.name as project_name, t.start_time, t.end_time 
          FROM time_logs t 
          JOIN projects p ON t.project_id = p.id 
@@ -109,8 +106,8 @@
 
       const csvContent = [
         "project,start,end",
-        ...timeLogs.map(
-          (log) =>
+        ...logs.map(
+          (log: TimeLogExport) =>
             `${log.project_name},${Math.floor(log.start_time / 1000)},${Math.floor(
               log.end_time / 1000
             )}`
