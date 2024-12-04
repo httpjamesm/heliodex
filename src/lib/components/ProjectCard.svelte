@@ -152,6 +152,7 @@
     gap: 1rem;
     margin: 0.5rem 0;
     touch-action: none;
+    min-width: 0;
 
     &.active {
       border-color: #2a9d8f;
@@ -171,6 +172,7 @@
     display: flex;
     gap: 1rem;
     flex: 1;
+    min-width: 0;
   }
 
   .color-bar {
@@ -181,11 +183,17 @@
 
   .content {
     flex: 1;
+    width: 100%;
+    min-width: 0;
 
     h2 {
       margin: 0;
       font-size: 1.25rem;
       font-weight: 500;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      width: 100%;
     }
 
     p {
