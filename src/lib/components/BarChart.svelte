@@ -1,8 +1,11 @@
 <script lang="ts">
   import type { Project } from "$lib/db/migrations";
   import { getProjectTimesForDate } from "$lib/db/migrations";
+  import { fade } from "svelte/transition";
+  import Spinner from "./Spinner.svelte";
 
   let { projects } = $props<{ projects: Project[] }>();
+  let loading = $state(true);
 
   const getColorFromName = (name: string) => {
     const hash = Array.from(name).reduce(
@@ -41,6 +44,7 @@
   );
 
   const loadData = async (projectsList: Project[]) => {
+    loading = true;
     const days: DayData[] = [];
 
     for (let i = 0; i < 7; i++) {
@@ -72,6 +76,7 @@
     }
 
     data = days;
+    loading = false;
   };
 
   $effect(() => {
@@ -82,28 +87,41 @@
 </script>
 
 <div class="chart">
-  {#each data as day}
-    <div class="bar-container">
-      <div class="bar">
-        {#if day.total > 0}
-          {#each day.projects as timeData}
-            <div
-              class="bar-segment"
-              style:background-color={timeData.color}
-              style:height={`${(timeData.hours / day.total) * 100}%`}
-            ></div>
-          {/each}
-        {:else}
-          <div class="no-data"></div>
-        {/if}
-      </div>
-      <div class="label">{day.date}</div>
+  {#if loading}
+    <div class="loading" transition:fade={{ duration: 200 }}>
+      <Spinner
+        size={24}
+        color="var(--text-color)"
+        secondaryColor="var(--surface-border-color)"
+      />
     </div>
-  {/each}
+  {:else}
+    <div class="bars" transition:fade={{ duration: 200 }}>
+      {#each data as day}
+        <div class="bar-container">
+          <div class="bar">
+            {#if day.total > 0}
+              {#each day.projects as timeData}
+                <div
+                  class="bar-segment"
+                  style:background-color={timeData.color}
+                  style:height={`${(timeData.hours / day.total) * 100}%`}
+                ></div>
+              {/each}
+            {:else}
+              <div class="no-data"></div>
+            {/if}
+          </div>
+          <div class="label">{day.date}</div>
+        </div>
+      {/each}
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">
   .chart {
+    position: relative;
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
@@ -158,5 +176,22 @@
     font-size: 0.875rem;
     color: var(--text-color);
     opacity: 0.7;
+  }
+
+  .loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    gap: 1rem;
   }
 </style>

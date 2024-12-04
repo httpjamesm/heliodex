@@ -2,6 +2,7 @@
   import { IconX } from "@tabler/icons-svelte";
   import type { Snippet } from "svelte";
   import { fade, fly } from "svelte/transition";
+  import Spinner from "./Spinner.svelte";
 
   const {
     title,
@@ -50,7 +51,7 @@
             {confirmText ?? "Confirm"}
           </span>
           {#if isLoading}
-            <div class="spinner"></div>
+            <Spinner size={16} />
           {/if}
         </button>
       </div>
@@ -173,24 +174,6 @@
     &:disabled {
       opacity: 0.7;
       cursor: not-allowed;
-    }
-  }
-
-  .spinner {
-    width: 16px;
-    height: 16px;
-    border: 2px solid white;
-    border-top: 2px solid #b8b8b8;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
     }
   }
 </style>
