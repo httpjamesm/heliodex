@@ -9,7 +9,7 @@
     type Project,
     getActiveLog,
   } from "$lib/db/migrations";
-  import { onMount } from "svelte";
+  import { selectionFeedback } from "@tauri-apps/plugin-haptics";
   import {
     isTracking,
     activeLogId,
@@ -65,7 +65,12 @@
     <h1>Projects</h1>
     <button
       class="archive-toggle"
-      onclick={() => (showArchived = !showArchived)}
+      onclick={() => {
+        try {
+          selectionFeedback();
+        } catch {}
+        showArchived = !showArchived;
+      }}
     >
       <IconArchive size={20} />
       {showArchived ? "Hide Archived" : "Show Archived"}
