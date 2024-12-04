@@ -1,8 +1,9 @@
 <script lang="ts">
   import "$lib/styles/main.scss";
-  import type { Snippet } from "svelte";
+  import { onMount, type Snippet } from "svelte";
   import { onNavigate } from "$app/navigation";
   import { page } from "$app/stores";
+  import { setTheme } from "$lib/utils/theme";
 
   let { children }: { children: Snippet } = $props();
 
@@ -16,6 +17,11 @@
         await navigation.complete;
       });
     });
+  });
+
+  onMount(() => {
+    const theme = window.localStorage.getItem("theme") || "System";
+    setTheme(theme as Theme);
   });
 </script>
 
