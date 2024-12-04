@@ -1,7 +1,8 @@
 <script lang="ts">
   import { getProjectElapsedTime } from "$lib/db/migrations";
-  import { selectedProject } from "$lib/stores/project";
+  import { activeProjectId } from "$lib/stores/project";
   import { IconArrowRight } from "@tabler/icons-svelte";
+  import { goto } from "$app/navigation";
 
   const {
     name,
@@ -25,7 +26,7 @@
   };
 
   let color = $derived(getColorFromName(name));
-  let isActive = $derived($selectedProject?.id === id);
+  let isActive = $derived($activeProjectId === id);
 
   $effect(() => {
     const loadTime = async () => {
@@ -34,6 +35,11 @@
     };
     loadTime();
   });
+
+  const startTracking = () => {
+    activeProjectId.set(id);
+    goto("/track");
+  };
 </script>
 
 <div class="project-card" class:active={isActive} on:click={onclick}>

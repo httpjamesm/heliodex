@@ -31,6 +31,14 @@ export const getDb = () => {
   return db;
 };
 
+export const getProject = async (id: number) => {
+  const result = await getDb().select<Project[]>(
+    "SELECT * FROM projects WHERE id = $1",
+    [id]
+  );
+  return result[0];
+};
+
 export const getProjects = async () => {
   const result = await getDb().select<Project[]>("SELECT * FROM projects");
   return result;

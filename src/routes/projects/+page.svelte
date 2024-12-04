@@ -11,9 +11,9 @@
   } from "$lib/db/migrations";
   import { onMount } from "svelte";
   import {
-    selectedProject,
     isTracking,
     activeLogId,
+    activeProjectId,
   } from "$lib/stores/project";
   import { goto } from "$app/navigation";
 
@@ -41,7 +41,7 @@
   };
 
   const selectProject = async (project: Project) => {
-    $selectedProject = project;
+    activeProjectId.set(project.id);
     const activeLog = await getActiveLog(project.id);
     if (activeLog) {
       $activeLogId = activeLog.id;
