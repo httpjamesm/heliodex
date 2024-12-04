@@ -29,7 +29,7 @@
       <ProjectCard
         id={project.id}
         name={project.name}
-        refreshProjects={loadProjects}
+        refreshProjects={getProjects}
       />
     {/each}
   </div>
