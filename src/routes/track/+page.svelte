@@ -1,11 +1,13 @@
 <script lang="ts">
   import Wave from "$lib/components/Wave.svelte";
+  import TimeLogs from "$lib/components/TimeLogs.svelte";
   import {
     getProjects,
     startTracking,
     stopTracking,
     getActiveLog,
     getProjectElapsedTime,
+    getProjectLogs,
   } from "$lib/db/migrations";
   import { onMount } from "svelte";
   import {
@@ -17,6 +19,8 @@
   let startTime: Date | null = $state(null);
   let secsElapsed = $state(0);
   let elapsedInterval: number | null = $state(null);
+  let logs = $state([]);
+  let showLogs = $state(false);
 
   const loadActiveLog = async () => {
     if (!$selectedProject) return;
@@ -69,6 +73,17 @@
     loadActiveLog();
   });
 
+  const loadLogs = async () => {
+    if (!$selectedProject) return;
+    logs = await getProjectLogs($selectedProject.id);
+  };
+
+  $effect(() => {
+    if (!$isTracking && $selectedProject) {
+      loadLogs();
+    }
+  });
+
   const workStatusTexts = [
     "Stay focused!",
     "Keep pushing!",
@@ -115,6 +130,10 @@
       </div>
     </button>
   </div>
+
+  {#if !$isTracking && logs.length > 0}
+    <TimeLogs {logs} show={showLogs} />
+  {/if}
 
   <div class="wave-container">
     <Wave
