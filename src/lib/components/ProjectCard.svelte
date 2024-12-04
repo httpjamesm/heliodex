@@ -3,9 +3,11 @@
   interface Props {
     name: string;
     hours: number;
+    id: number;
+    onclick?: () => void;
   }
 
-  const { name, hours }: Props = $props();
+  const { name, hours, id, onclick }: Props = $props();
 
   const getColorFromName = (name: string) => {
     const hash = Array.from(name).reduce((acc, char) => {
@@ -20,7 +22,7 @@
   const formattedHours = $derived(hours.toFixed(2));
 </script>
 
-<a class="card" href={`/${name.toLowerCase()}`}>
+<a class="card" href={`/track?project_id=${id}`} {onclick}>
   <div class="color-bar" style:background-color={color}></div>
   <div class="content">
     <h2>{name}</h2>

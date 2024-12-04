@@ -4,6 +4,7 @@
   import FAB from "$lib/components/FAB.svelte";
   import Modal from "$lib/components/Modal.svelte";
   import { getProjects, addProject, type Project } from "$lib/db/migrations";
+  import { onMount } from "svelte";
 
   let searchQuery = $state("");
   let projects = $state<Project[]>([]);
@@ -28,7 +29,7 @@
     isModalOpen = false;
   };
 
-  $effect(() => {
+  onMount(() => {
     loadProjects();
   });
 </script>
@@ -49,7 +50,11 @@
 
   <div class="projects-grid">
     {#each filteredProjects as project}
-      <ProjectCard name={project.name} hours={project.seconds / 3600} />
+      <ProjectCard
+        name={project.name}
+        hours={project.seconds / 3600}
+        id={project.id}
+      />
     {/each}
   </div>
 

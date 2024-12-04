@@ -1,13 +1,49 @@
 <script lang="ts">
   import Wave from "$lib/components/Wave.svelte";
+  import {
+    getProjects,
+    type Project,
+    startTracking,
+    stopTracking,
+    getActiveLog,
+  } from "$lib/db/migrations";
+  import { onMount } from "svelte";
+  import { page } from "$app/stores";
 
   let isWorking = $state(false);
   let startTime: Date | null = $state(null);
   let secsElapsed = $state(0);
   let elapsedInterval: number | null = $state(null);
+  let project = $state<Project | null>(null);
+  let activeLogId = $state<number | null>(null);
 
-  const toggleWorking = () => {
+  const loadProject = async () => {
+    const projectId = Number($page.url.searchParams.get("project_id"));
+    if (!projectId) return;
+
+    const projects = await getProjects();
+    project = projects.find((p) => p.id === projectId) ?? null;
+
+    const activeLog = await getActiveLog(projectId);
+    if (activeLog) {
+      activeLogId = activeLog.id;
+      isWorking = true;
+    }
+  };
+
+  const toggleWorking = async () => {
+    if (!project) return;
+
     isWorking = !isWorking;
+    if (isWorking) {
+      activeLogId = await startTracking(project.id);
+    } else if (activeLogId) {
+      await stopTracking(activeLogId);
+      activeLogId = null;
+    }
+  };
+
+  $effect(() => {
     if (isWorking) {
       startTime = new Date();
       elapsedInterval = setInterval(() => {
@@ -21,14 +57,10 @@
         elapsedInterval = null;
       }
     }
-  };
+  });
 
-  $effect(() => {
-    if (isWorking) {
-      document.title = "Working - Track";
-    } else {
-      document.title = "Paused - Track";
-    }
+  onMount(() => {
+    loadProject();
   });
 
   const workStatusTexts = [
@@ -50,17 +82,22 @@
     class="track-button"
     class:working={isWorking}
     onclick={toggleWorking}
+    disabled={!project}
   >
     <div class="button-content">
       <div class="button-content-inner">
         <span class="status-text">
-          {isWorking
-            ? workStatusTexts[
-                Math.floor(Math.random() * workStatusTexts.length)
-              ]
-            : "Paused"}
+          {#if !project}
+            No project selected
+          {:else if isWorking}
+            {workStatusTexts[
+              Math.floor(Math.random() * workStatusTexts.length)
+            ]}
+          {:else}
+            Paused
+          {/if}
         </span>
-        {#if secsElapsed > 0}
+        {#if secsElapsed > 0 && isWorking}
           <span class="time-elapsed"> {secsElapsed}s </span>
         {/if}
       </div>
@@ -95,6 +132,12 @@
     overflow: hidden;
     padding: 3rem;
     box-sizing: border-box;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
   }
 
   .track-button.working {
@@ -110,8 +153,6 @@
     color: white;
     font-size: 1.5rem;
     font-weight: 600;
-    /* text-transform: uppercase; */
-    /* letter-spacing: 0.1em; */
 
     .button-content-inner {
       text-align: center;
@@ -142,11 +183,11 @@
     }
   }
 
-  .track-button:hover {
+  .track-button:not(:disabled):hover {
     transform: scale(1.02);
   }
 
-  .track-button:active {
+  .track-button:not(:disabled):active {
     transform: scale(0.98);
   }
 
