@@ -31,6 +31,7 @@
           id={project.id}
           name={project.name}
           refreshProjects={getProjects}
+          disableDrawer
         />
       {/each}
     </div>

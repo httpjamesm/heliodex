@@ -18,12 +18,14 @@
     archived = false,
     onclick,
     refreshProjects,
+    disableDrawer = false,
   }: {
     name: string;
     id: number;
     archived: boolean;
     onclick: () => void;
     refreshProjects: () => void;
+    disableDrawer?: boolean;
   } = $props();
 
   let hours = $state(0);
@@ -59,7 +61,9 @@
   const handlePointerDown = () => {
     isPressing = true;
     pressTimer = setTimeout(() => {
-      isDrawerOpen = true;
+      if (!disableDrawer) {
+        isDrawerOpen = true;
+      }
       isPressing = false;
     }, 500) as unknown as number;
   };
