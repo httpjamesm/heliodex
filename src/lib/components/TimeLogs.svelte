@@ -5,6 +5,7 @@
   import TimeLogDrawer from "./TimeLogDrawer.svelte";
   import { deleteTimeLog } from "$lib/db/migrations";
   import { formatSeconds } from "$lib/utils/time";
+  import { selectionFeedback } from "@tauri-apps/plugin-haptics";
 
   let {
     logs,
@@ -40,7 +41,7 @@
 
 <TimeLogDrawer
   isOpen={isDrawerOpen}
-  log={selectedLog}
+  log={selectedLog!}
   onClose={() => (isDrawerOpen = false)}
   onDelete={handleDelete}
 />
@@ -48,7 +49,12 @@
 <div class="logs-section">
   <button
     class="toggle-logs-btn"
-    on:click={() => (show = !show)}
+    onclick={() => {
+      try {
+        selectionFeedback();
+      } catch {}
+      show = !show;
+    }}
     transition:fade
   >
     {show ? "Hide" : "Show"} Time Logs
@@ -62,7 +68,7 @@
           <div
             class="log-item"
             class:readonly
-            on:click={() => handleLogPress(log)}
+            onclick={() => handleLogPress(log)}
           >
             <div class="log-date">
               {relativeTime.from(log.start_time)}
@@ -70,7 +76,9 @@
             <div class="log-time">
               {new Date(log.start_time).toLocaleTimeString("en-GB")}
               <span class="log-time-separator">-</span>
-              {new Date(log.end_time).toLocaleTimeString("en-GB")}
+              {new Date(
+                log.end_time || new Date().getTime()
+              ).toLocaleTimeString("en-GB")}
             </div>
             <div class="log-duration">
               {formatSeconds((log.end_time - log.start_time) / 1000)}

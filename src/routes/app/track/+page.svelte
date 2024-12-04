@@ -14,7 +14,7 @@
     activeLogId,
     activeProjectId,
   } from "$lib/stores/project";
-  import type { Project } from "$lib/db/migrations";
+  import type { Project, TimeLog } from "$lib/db/migrations";
   import { getProject } from "$lib/db/migrations";
   import { goto } from "$app/navigation";
   import { formatSeconds } from "$lib/utils/time";
@@ -23,12 +23,11 @@
     selectionFeedback,
     impactFeedback,
   } from "@tauri-apps/plugin-haptics";
-  import type { ImpactFeedbackStyle } from "@tauri-apps/plugin-haptics";
 
   let startTime: Date | null = $state(null);
   let secsElapsed = $state(0);
   let elapsedInterval: number | null = $state(null);
-  let logs = $state([]);
+  let logs = $state<TimeLog[]>([]);
   let showLogs = $state(false);
   let project = $state<Project | null>(null);
   let mounted = $state(false);
@@ -48,6 +47,7 @@
       $isTracking = true;
       startTime = new Date(activeLog.start_time);
       secsElapsed = Math.floor((Date.now() - activeLog.start_time) / 1000);
+      createPulseInterval();
     } else {
       secsElapsed = await getProjectElapsedTime(project.id);
     }
@@ -60,25 +60,32 @@
     if (!project) return;
     secsElapsed = 0;
 
-    $isTracking = !$isTracking;
+    isTracking.update((value) => !value);
     if ($isTracking) {
-      pulseInterval = setInterval(() => {
-        try {
-          impactFeedback(ImpactFeedbackStyle.Light);
-        } catch {}
-      }, 2000);
       startTime = new Date();
-      $activeLogId = await startTracking(project.id);
+      const newLogId = await startTracking(project.id);
+      if (newLogId) {
+        activeLogId.set(newLogId);
+      }
+      createPulseInterval();
       return;
     } else if ($activeLogId) {
       await stopTracking($activeLogId);
-      $activeLogId = null;
+      activeLogId.set(null);
     }
 
     // update logs
     loadLogs();
     // if not tracking, clear the pulse interval
     cleanup();
+  };
+
+  const createPulseInterval = () => {
+    pulseInterval = setInterval(() => {
+      try {
+        impactFeedback("light");
+      } catch {}
+    }, 2000);
   };
 
   $effect(() => {
