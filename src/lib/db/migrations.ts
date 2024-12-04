@@ -113,6 +113,54 @@ export const getActiveLog = async (project_id: number) => {
   return result[0] || null;
 };
 
+export const getProjectTimeForDate = async (project_id: number, date: Date) => {
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const result = await getDb().select<{ total_seconds: number }[]>(
+    `SELECT COALESCE(SUM(
+      CASE 
+        WHEN end_time IS NULL THEN (strftime('%s', 'now') * 1000 - start_time) / 1000
+        ELSE (end_time - start_time) / 1000
+      END
+    ), 0) as total_seconds
+    FROM time_logs 
+    WHERE project_id = $1 
+    AND start_time >= $2 
+    AND start_time <= $3`,
+    [project_id, startOfDay.getTime(), endOfDay.getTime()]
+  );
+  return Math.floor(result[0].total_seconds);
+};
+
+export const getProjectTimesForDate = async (date: Date) => {
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const result = await getDb().select<
+    { project_id: number; total_seconds: number }[]
+  >(
+    `SELECT 
+      project_id,
+      COALESCE(SUM(
+        CASE 
+          WHEN end_time IS NULL THEN (strftime('%s', 'now') * 1000 - start_time) / 1000
+          ELSE (end_time - start_time) / 1000
+        END
+      ), 0) as total_seconds
+    FROM time_logs 
+    WHERE start_time >= $1 
+    AND start_time <= $2
+    GROUP BY project_id`,
+    [startOfDay.getTime(), endOfDay.getTime()]
+  );
+  return result;
+};
+
 export type Project = {
   id: number;
   name: string;

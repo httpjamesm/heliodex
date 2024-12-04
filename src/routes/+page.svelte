@@ -1,6 +1,7 @@
 <script lang="ts">
   import HomeArc from "$lib/components/HomeArc.svelte";
   import ProjectCard from "$lib/components/ProjectCard.svelte";
+  import BarChart from "$lib/components/BarChart.svelte";
   import type { Project } from "$lib/db/migrations";
   import { getProjects } from "$lib/db/migrations";
   import { onMount } from "svelte";
@@ -21,6 +22,9 @@
 <div class="wrapper">
   <div class="container">
     <h1>Let's get some<br />work done.</h1>
+    <div class="chart-container">
+      <BarChart projects={recentProjects}></BarChart>
+    </div>
     {#each recentProjects as project}
       <ProjectCard name={project.name}></ProjectCard>
     {/each}
@@ -52,5 +56,9 @@
         letter-spacing: -0.05em;
       }
     }
+  }
+
+  .chart-container {
+    margin: 2rem 0;
   }
 </style>
