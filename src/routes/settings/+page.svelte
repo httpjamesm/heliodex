@@ -2,12 +2,11 @@
   import { resetDatabase, getDb, type TimeLog } from "$lib/db/migrations";
   import Modal from "$lib/components/Modal.svelte";
   import { goto } from "$app/navigation";
-  import { save } from "@tauri-apps/plugin-dialog";
-  import { writeTextFile, BaseDirectory } from "@tauri-apps/plugin-fs";
+  import { save, open } from "@tauri-apps/plugin-dialog";
+  import { writeTextFile, readTextFile } from "@tauri-apps/plugin-fs";
 
   let isResetModalOpen = $state(false);
   let isImportModalOpen = $state(false);
-  let importData = $state("");
   let importError = $state("");
 
   const handleReset = async () => {
@@ -19,7 +18,19 @@
   const handleImport = async () => {
     try {
       importError = "";
-      const lines = importData.trim().split("\n");
+
+      const filePath = await open({
+        filters: [
+          {
+            name: "CSV Files",
+            extensions: ["csv"],
+          },
+        ],
+      });
+
+      if (!filePath) return;
+      const fileContent = await readTextFile(filePath);
+      const lines = fileContent.trim().split("\n");
 
       if (lines[0].toLowerCase() !== "project,start,end") {
         throw new Error(
@@ -61,7 +72,6 @@
       }
 
       isImportModalOpen = false;
-      importData = "";
       goto("/projects");
     } catch (error) {
       importError = error instanceof Error ? error.message : "Import failed";
@@ -146,21 +156,13 @@
     isOpen={isImportModalOpen}
     onClose={() => (isImportModalOpen = false)}
     onConfirm={handleImport}
-    confirmText="Import"
+    confirmText="Select File"
   >
     <div class="import-container">
       <p>
-        Paste your CSV data below. The CSV should have three columns: "project",
-        "start", and "end", containing Unix timestamps in seconds.
+        Select a CSV file to import. The CSV should have three columns:
+        "project", "start", and "end", containing Unix timestamps in seconds.
       </p>
-      <textarea
-        bind:value={importData}
-        placeholder="project,start,end
-Project A,1677123456,1677127056
-Project A,1677134567,1677138167
-Project B,1677145678,1677149278"
-        rows="10"
-      ></textarea>
       {#if importError}
         <p class="error">{importError}</p>
       {/if}
