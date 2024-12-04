@@ -129,11 +129,6 @@
     margin: 0.5rem 0;
     touch-action: none;
 
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
     &.active {
       border-color: #2a9d8f;
       box-shadow: 0 0 0 1px #2a9d8f;
