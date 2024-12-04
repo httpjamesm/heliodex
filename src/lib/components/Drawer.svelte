@@ -58,6 +58,7 @@
     display: flex;
     flex-direction: column;
     border-radius: 1rem 1rem 0 0;
+    padding-bottom: 2rem;
   }
 
   .close-button {
