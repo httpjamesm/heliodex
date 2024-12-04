@@ -94,9 +94,6 @@
   });
 
   onMount(() => {
-    if (!$activeProjectId) {
-      goto(Pages.Projects);
-    }
     mounted = true;
   });
 
@@ -150,47 +147,64 @@
   });
 </script>
 
-{#if mounted && project}
+{#if mounted}
   <div class="container">
     <div class="header">
-      <h1>Track <span class="project-name">{project.name}</span></h1>
+      <h1>
+        Track {#if project}<span class="project-name">{project.name}</span>{/if}
+      </h1>
     </div>
 
     <div class="track-container">
-      <button
-        class="track-button"
-        class:working={$isTracking}
-        onclick={toggleWorking}
-        disabled={!project}
-      >
-        <div class="button-content">
-          <div class="button-content-inner">
-            <span class="status-text">
-              {#if !project}
-                No project selected
-              {:else if $isTracking}
-                {workStatusTexts[
-                  Math.floor(Math.random() * workStatusTexts.length)
-                ]}
-              {:else}
-                Paused
+      {#if project}
+        <button
+          class="track-button"
+          class:working={$isTracking}
+          onclick={toggleWorking}
+        >
+          <div class="button-content">
+            <div class="button-content-inner">
+              <span class="status-text">
+                {#if $isTracking}
+                  {workStatusTexts[
+                    Math.floor(Math.random() * workStatusTexts.length)
+                  ]}
+                {:else}
+                  Paused
+                {/if}
+              </span>
+              {#if secsElapsed > 0}
+                <span class="time-elapsed"> {formatSeconds(secsElapsed)} </span>
               {/if}
-            </span>
-            {#if secsElapsed > 0}
-              <span class="time-elapsed"> {formatSeconds(secsElapsed)} </span>
-            {/if}
+            </div>
           </div>
-        </div>
-      </button>
+        </button>
+      {:else}
+        <button
+          class="no-project"
+          onclick={() => {
+            try {
+              selectionFeedback();
+            } catch {}
+            goto(Pages.Projects);
+          }}
+        >
+          <span>Select a project</span>
+        </button>
+      {/if}
     </div>
 
-    {#if !$isTracking && logs.length > 0}
+    {#if project && !$isTracking && logs.length > 0}
       <TimeLogs {logs} show={showLogs} />
     {/if}
     <div class="wave-container">
       <Wave
         speed={$isTracking ? 3 : 0}
-        color={$isTracking ? "42, 157, 143" : "130, 130, 130"}
+        color={project
+          ? $isTracking
+            ? "42, 157, 143"
+            : "130, 130, 130"
+          : "130, 130, 130"}
       />
     </div>
   </div>
@@ -309,5 +323,20 @@
     left: 0;
     z-index: 0;
     width: 100%;
+  }
+
+  .no-project {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background-color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    text-align: center;
+    padding: 1rem;
+    border: none;
   }
 </style>
