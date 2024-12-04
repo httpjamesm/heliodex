@@ -9,16 +9,18 @@
   let { speed, color }: { speed: number; color: string } = $props();
 
   const generateWavePaths = () => {
-    // Generate the top wave line
+    const wavelength = (2 * Math.PI) / frequency;
     let topPath = `M -${width} ${height / 2}`;
+
     for (let x = -width; x <= 2 * width; x++) {
-      const y = height / 2 + amplitude * Math.sin((x + position) * frequency);
+      const normalizedX =
+        (((x + position) % wavelength) + wavelength) % wavelength;
+      const y = height / 2 + amplitude * Math.sin(normalizedX * frequency);
       topPath += ` L ${x} ${y}`;
     }
 
-    // Generate the fill path
-    let fillPath = topPath; // Start with the top wave line
-    fillPath += ` L ${2 * width} ${height} L -${width} ${height} Z`; // Add bottom rectangle
+    let fillPath = topPath;
+    fillPath += ` L ${2 * width} ${height} L -${width} ${height} Z`;
 
     return { topPath, fillPath };
   };
@@ -27,7 +29,6 @@
 
   const animate = () => {
     position += speed;
-    if (position > 2 * width) position = 0;
     animationFrame = requestAnimationFrame(animate);
   };
 
@@ -42,19 +43,19 @@
 
 <div class="wave-container">
   <svg viewBox="0 0 {width} {height}">
-    <!-- Fill path without stroke -->
     <path
       d={generateWavePaths().fillPath}
       fill={`rgba(${color}, 0.2)`}
       stroke="none"
-    />
-    <!-- Top wave line with stroke -->
+    >
+    </path>
     <path
       d={generateWavePaths().topPath}
       fill="none"
       stroke={`rgba(${color}, 0.4)`}
       stroke-width="1.5"
-    />
+    >
+    </path>
   </svg>
 </div>
 
