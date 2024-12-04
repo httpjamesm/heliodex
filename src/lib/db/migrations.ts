@@ -161,6 +161,11 @@ export const getProjectTimesForDate = async (date: Date) => {
   return result;
 };
 
+export const resetDatabase = async () => {
+  await getDb().execute("DELETE FROM time_logs");
+  await getDb().execute("DELETE FROM projects");
+};
+
 export type Project = {
   id: number;
   name: string;
