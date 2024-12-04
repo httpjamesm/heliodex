@@ -26,7 +26,7 @@
       <BarChart projects={recentProjects}></BarChart>
     </div>
     {#each recentProjects as project}
-      <ProjectCard name={project.name}></ProjectCard>
+      <ProjectCard id={project.id} name={project.name}></ProjectCard>
     {/each}
   </div>
 </div>
