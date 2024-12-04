@@ -9,7 +9,10 @@
   import { goto } from "$app/navigation";
   import { spring } from "svelte/motion";
   import { Pages } from "$lib/pages";
-  import { selectionFeedback } from "@tauri-apps/plugin-haptics";
+  import {
+    impactFeedback,
+    selectionFeedback,
+  } from "@tauri-apps/plugin-haptics";
 
   let scale = spring(1, { stiffness: 0.008, damping: 1 });
   let overlay = spring(0, { stiffness: 0.006, damping: 1 });
@@ -52,6 +55,14 @@
             await selectionFeedback();
           } catch {}
           handleClick();
+
+          //   in rapid succession, fire light impact feedback
+          for (let i = 0; i < 5; i++) {
+            try {
+              await new Promise((resolve) => setTimeout(resolve, 100));
+              await impactFeedback("light");
+            } catch {}
+          }
         }}
         style:transform="scale({$scale})"
       >
