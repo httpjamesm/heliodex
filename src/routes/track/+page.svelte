@@ -17,6 +17,7 @@
   import type { Project } from "$lib/db/migrations";
   import { getProject } from "$lib/db/migrations";
   import { goto } from "$app/navigation";
+  import { formatSeconds } from "$lib/utils/time";
 
   let startTime: Date | null = $state(null);
   let secsElapsed = $state(0);
@@ -146,7 +147,7 @@
               {/if}
             </span>
             {#if secsElapsed > 0}
-              <span class="time-elapsed"> {secsElapsed}s </span>
+              <span class="time-elapsed"> {formatSeconds(secsElapsed)} </span>
             {/if}
           </div>
         </div>
