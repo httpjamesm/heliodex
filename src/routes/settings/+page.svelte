@@ -4,10 +4,20 @@
   import { goto } from "$app/navigation";
   import { save, open } from "@tauri-apps/plugin-dialog";
   import { writeTextFile, readTextFile } from "@tauri-apps/plugin-fs";
+  import { themes, setTheme, type Theme } from "$lib/utils/theme";
 
   let isResetModalOpen = $state(false);
   let isImportModalOpen = $state(false);
   let importError = $state("");
+
+  let selectedTheme = $state(
+    (localStorage.getItem("theme") as Theme) || "System"
+  );
+
+  const handleThemeChange = (theme: Theme) => {
+    selectedTheme = theme;
+    setTheme(theme);
+  };
 
   const handleReset = async () => {
     await resetDatabase();
@@ -128,14 +138,30 @@
 
   <div class="settings-grid">
     <div class="setting-group">
+      <h2>Appearance</h2>
+      <div class="theme-selector">
+        <label for="theme">Theme</label>
+        <select
+          id="theme"
+          value={selectedTheme}
+          onchange={(e) => handleThemeChange(e.currentTarget.value as Theme)}
+        >
+          {#each themes as theme}
+            <option value={theme}>{theme}</option>
+          {/each}
+        </select>
+      </div>
+    </div>
+
+    <div class="setting-group">
       <h2>Data Management</h2>
-      <button class="danger" on:click={() => (isResetModalOpen = true)}>
+      <button class="danger" onclick={() => (isResetModalOpen = true)}>
         Reset App Data
       </button>
-      <button on:click={() => (isImportModalOpen = true)}>
+      <button onclick={() => (isImportModalOpen = true)}>
         Import Time Logs
       </button>
-      <button on:click={handleExport}> Export Time Logs </button>
+      <button onclick={handleExport}>Export Time Logs</button>
     </div>
   </div>
 
@@ -250,5 +276,31 @@
       background-color: #e63946;
       color: white;
     }
+  }
+
+  .theme-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .theme-selector label {
+    font-size: 1rem;
+    color: var(--text-color);
+  }
+
+  .theme-selector select {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    background-color: var(--surface-color);
+    color: var(--text-color);
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  .theme-selector select:focus {
+    outline: none;
+    border-color: var(--primary-color);
   }
 </style>

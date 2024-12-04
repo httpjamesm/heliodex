@@ -7,6 +7,26 @@
     --text-color: #F4F4F4;
 }
 
+@media (prefers-color-scheme: light) {
+    [data-theme="system"] {
+        --background-color: white;
+        --surface-color: #F4F4F4;
+        --surface-border-color: #E0E0E0;
+        --surface-hover-color: #E8E8E8;
+        --menu-color: #F4F4F4;
+        --text-color: #1C1C1C;
+    }
+}
+
+[data-theme="light"] {
+    --background-color: white;
+    --surface-color: #F4F4F4;
+    --surface-border-color: #E0E0E0;
+    --surface-hover-color: #E8E8E8;
+    --menu-color: #F4F4F4;
+    --text-color: #1C1C1C;
+}
+
 * {
     font-family: 'Inter', sans-serif;
     user-select: none;

@@ -4,6 +4,7 @@
   import "$lib/styles/main.scss";
   import { onMount, type Snippet } from "svelte";
   import { IconLoader2 } from "@tabler/icons-svelte";
+  import { setTheme } from "$lib/utils/theme";
 
   let { children }: { children: Snippet } = $props();
 
@@ -12,6 +13,11 @@
   onMount(async () => {
     await initDatabase();
     databaseInitialized = true;
+  });
+
+  $effect(() => {
+    const theme = localStorage.getItem("theme") || "System";
+    setTheme(theme as Theme);
   });
 </script>
 
