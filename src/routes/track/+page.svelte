@@ -41,7 +41,7 @@
     } else if ($activeLogId) {
       await stopTracking($activeLogId);
       $activeLogId = null;
-      secsElapsed = await getProjectElapsedTime($selectedProject.id);
+      secsElapsed = 0;
     }
   };
 
@@ -105,7 +105,7 @@
                 Math.floor(Math.random() * workStatusTexts.length)
               ]}
             {:else}
-              Click to start
+              Paused
             {/if}
           </span>
           {#if secsElapsed > 0}
