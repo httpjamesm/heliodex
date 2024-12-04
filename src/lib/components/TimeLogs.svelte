@@ -176,7 +176,7 @@
     }
 
     .log-date {
-      color: rgba(244, 244, 244, 0.7);
+      color: var(--text-color-secondary);
       font-size: 0.9rem;
     }
 
