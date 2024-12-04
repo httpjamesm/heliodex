@@ -13,7 +13,9 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init());
 
     #[cfg(any(target_os = "android", target_os = "ios"))]
-    builder = builder.plugin(tauri_plugin_haptics::init());
+    {
+        builder = builder.plugin(tauri_plugin_haptics::init());
+    }
 
     builder
         .invoke_handler(tauri::generate_handler![greet])

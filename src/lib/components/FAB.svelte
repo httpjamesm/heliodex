@@ -1,11 +1,20 @@
 <script lang="ts">
   import type { ComponentType } from "svelte";
+  import { selectionFeedback } from "@tauri-apps/plugin-haptics";
 
   let { icon, onclick }: { icon: ComponentType; onclick: () => void } =
     $props();
 </script>
 
-<button class="fab" {onclick}>
+<button
+  class="fab"
+  onclick={async () => {
+    try {
+      await selectionFeedback();
+    } catch {}
+    onclick();
+  }}
+>
   <svelte:component this={icon} size={24} />
 </button>
 

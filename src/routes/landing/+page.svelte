@@ -9,6 +9,7 @@
   import { goto } from "$app/navigation";
   import { spring } from "svelte/motion";
   import { Pages } from "$lib/pages";
+  import { selectionFeedback } from "@tauri-apps/plugin-haptics";
 
   let scale = spring(1, { stiffness: 0.008, damping: 1 });
   let overlay = spring(0, { stiffness: 0.006, damping: 1 });
@@ -46,7 +47,12 @@
     <div class="track-container">
       <button
         class="track-button working"
-        on:click={handleClick}
+        onclick={async () => {
+          try {
+            await selectionFeedback();
+          } catch {}
+          handleClick();
+        }}
         style:transform="scale({$scale})"
       >
         <div class="button-content">

@@ -8,7 +8,7 @@
     getProjectElapsedTime,
     getProjectLogs,
   } from "$lib/db/migrations";
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import {
     isTracking,
     activeLogId,
@@ -19,6 +19,12 @@
   import { goto } from "$app/navigation";
   import { formatSeconds } from "$lib/utils/time";
   import { Pages } from "$lib/pages";
+  import {
+    selectionFeedback,
+    impactFeedback,
+  } from "@tauri-apps/plugin-haptics";
+  import type { ImpactFeedbackStyle } from "@tauri-apps/plugin-haptics";
+
   let startTime: Date | null = $state(null);
   let secsElapsed = $state(0);
   let elapsedInterval: number | null = $state(null);
@@ -26,6 +32,7 @@
   let showLogs = $state(false);
   let project = $state<Project | null>(null);
   let mounted = $state(false);
+  let pulseInterval: number | null = $state(null);
 
   const loadActiveLog = async () => {
     if (!project) return;
@@ -41,17 +48,29 @@
   };
 
   const toggleWorking = async () => {
+    try {
+      await selectionFeedback();
+    } catch {}
     if (!project) return;
 
     $isTracking = !$isTracking;
     if ($isTracking) {
+      pulseInterval = setInterval(() => {
+        try {
+          impactFeedback(ImpactFeedbackStyle.Light);
+        } catch {}
+      }, 2000);
       startTime = new Date();
       $activeLogId = await startTracking(project.id);
+      return;
     } else if ($activeLogId) {
       await stopTracking($activeLogId);
       $activeLogId = null;
       secsElapsed = 0;
     }
+
+    // if not tracking, clear the pulse interval
+    cleanup();
   };
 
   $effect(() => {
@@ -118,6 +137,17 @@
     "Onward!",
     "Finish it!",
   ];
+
+  const cleanup = () => {
+    if (pulseInterval) {
+      clearInterval(pulseInterval);
+      pulseInterval = null;
+    }
+  };
+
+  onDestroy(() => {
+    cleanup();
+  });
 </script>
 
 {#if mounted && project}

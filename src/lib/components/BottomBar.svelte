@@ -7,6 +7,7 @@
     IconSettings,
   } from "@tabler/icons-svelte";
   import { Pages } from "$lib/pages";
+  import { selectionFeedback } from "@tauri-apps/plugin-haptics";
 
   const screens = [
     {
@@ -35,7 +36,15 @@
 <div class="bottom-bar">
   <div class="container">
     {#each screens as screen}
-      <a href={screen.href} class:active={$page.url.pathname === screen.href}>
+      <a
+        href={screen.href}
+        class:active={$page.url.pathname === screen.href}
+        onclick={async () => {
+          try {
+            await selectionFeedback();
+          } catch {}
+        }}
+      >
         <screen.icon />
         {screen.label}
       </a>
