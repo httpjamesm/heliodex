@@ -207,7 +207,7 @@
             goto(Pages.Projects);
           }}
         >
-          <span>Select a project</span>
+          <span>Select project</span>
         </button>
       {/if}
     </div>
@@ -373,6 +373,7 @@
     color: white;
     font-size: 1.25rem;
     font-weight: 500;
+    border: none;
 
     &:hover {
       transform: scale(1.02);
