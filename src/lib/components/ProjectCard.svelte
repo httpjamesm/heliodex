@@ -5,7 +5,7 @@
   import { goto } from "$app/navigation";
   import ProjectDrawer from "./ProjectDrawer.svelte";
   import { deleteProject, renameProject } from "$lib/db/migrations";
-
+  import { Pages } from "$lib/pages";
   let {
     name,
     id,
@@ -45,7 +45,7 @@
 
   const startTracking = () => {
     activeProjectId.set(id);
-    goto("/track");
+    goto(Pages.Track);
   };
 
   const handlePointerDown = () => {

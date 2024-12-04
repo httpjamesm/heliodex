@@ -6,6 +6,7 @@
     --menu-color: #090909;
     --text-color: #F4F4F4;
     --placeholder-color: #484848;
+    --secondary-text-color: #9e9e9e;
 }
 
 @media (prefers-color-scheme: light) {
@@ -17,6 +18,7 @@
         --menu-color: #F4F4F4;
         --text-color: #1C1C1C;
         --placeholder-color: #484848;
+        --secondary-text-color: #9e9e9e;
     }
 }
 
@@ -28,6 +30,7 @@
     --menu-color: #F4F4F4;
     --text-color: #1C1C1C;
     --placeholder-color: #484848;
+    --secondary-text-color: #9e9e9e;
 }
 
 * {

@@ -18,7 +18,7 @@
   import { getProject } from "$lib/db/migrations";
   import { goto } from "$app/navigation";
   import { formatSeconds } from "$lib/utils/time";
-
+  import { Pages } from "$lib/pages";
   let startTime: Date | null = $state(null);
   let secsElapsed = $state(0);
   let elapsedInterval: number | null = $state(null);
@@ -76,7 +76,7 @@
 
   onMount(() => {
     if (!$activeProjectId) {
-      goto("/projects");
+      goto(Pages.Projects);
     }
     mounted = true;
   });
@@ -98,7 +98,7 @@
         project = await getProject($activeProjectId);
         if (!project) {
           activeProjectId.clear();
-          goto("/projects");
+          goto(Pages.Projects);
         }
         await loadActiveLog();
       };

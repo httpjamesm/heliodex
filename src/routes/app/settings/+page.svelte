@@ -5,7 +5,7 @@
   import { save, open } from "@tauri-apps/plugin-dialog";
   import { writeTextFile, readTextFile } from "@tauri-apps/plugin-fs";
   import { themes, setTheme, type Theme } from "$lib/utils/theme";
-
+  import { Pages } from "$lib/pages";
   let isResetModalOpen = $state(false);
   let isImportModalOpen = $state(false);
   let importError = $state("");
@@ -82,7 +82,7 @@
       }
 
       isImportModalOpen = false;
-      goto("/projects");
+      goto(Pages.Projects);
     } catch (error) {
       importError = error instanceof Error ? error.message : "Import failed";
     }

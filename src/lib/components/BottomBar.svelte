@@ -6,26 +6,27 @@
     IconBriefcase,
     IconSettings,
   } from "@tabler/icons-svelte";
+  import { Pages } from "$lib/pages";
 
   const screens = [
     {
       label: "Home",
-      href: "/",
+      href: Pages.Home,
       icon: IconHome,
     },
     {
       label: "Track",
-      href: "/track",
+      href: Pages.Track,
       icon: IconStopwatch,
     },
     {
       label: "Projects",
-      href: "/projects",
+      href: Pages.Projects,
       icon: IconBriefcase,
     },
     {
       label: "Settings",
-      href: "/settings",
+      href: Pages.Settings,
       icon: IconSettings,
     },
   ];

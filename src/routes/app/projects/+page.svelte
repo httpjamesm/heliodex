@@ -16,6 +16,7 @@
     activeProjectId,
   } from "$lib/stores/project";
   import { goto } from "$app/navigation";
+  import { Pages } from "$lib/pages";
 
   let searchQuery = $state("");
   let projects = $state<Project[]>([]);
@@ -50,7 +51,7 @@
       $activeLogId = null;
       $isTracking = false;
     }
-    goto("/track");
+    goto(Pages.Track);
   };
 
   onMount(async () => {
