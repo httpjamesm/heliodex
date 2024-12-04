@@ -16,11 +16,7 @@
 
 <div class="layout">
   <div class="content">
-    {#if !databaseInitialized}
-      <div class="loading">
-        <IconLoader2 size={20} />
-      </div>
-    {:else}
+    {#if databaseInitialized}
       {@render children?.()}
     {/if}
   </div>

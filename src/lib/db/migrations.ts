@@ -1,27 +1,68 @@
 import Database from "@tauri-apps/plugin-sql";
 
 export const migrations = [
-  `CREATE TABLE IF NOT EXISTS projects (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL
-  )`,
-  `CREATE TABLE IF NOT EXISTS time_logs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    project_id INTEGER NOT NULL,
-    start_time INTEGER NOT NULL,
-    end_time INTEGER,
-    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
-  )`,
-  `ALTER TABLE projects ADD COLUMN archived INTEGER NOT NULL DEFAULT 0`,
+  {
+    version: 1,
+    sql: `CREATE TABLE IF NOT EXISTS schema_version (
+      version INTEGER PRIMARY KEY
+    )`,
+  },
+  {
+    version: 2,
+    sql: `CREATE TABLE IF NOT EXISTS projects (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL
+    )`,
+  },
+  {
+    version: 3,
+    sql: `CREATE TABLE IF NOT EXISTS time_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      project_id INTEGER NOT NULL,
+      start_time INTEGER NOT NULL,
+      end_time INTEGER,
+      FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+    )`,
+  },
+  {
+    version: 4,
+    sql: `ALTER TABLE projects ADD COLUMN archived INTEGER NOT NULL DEFAULT 0`,
+  },
 ];
 
 let db: Database;
 
+export const getCurrentVersion = async (): Promise<number> => {
+  try {
+    const result = await db.select<{ version: number }[]>(
+      "SELECT version FROM schema_version ORDER BY version DESC LIMIT 1"
+    );
+    return result[0]?.version ?? 0;
+  } catch {
+    return 0;
+  }
+};
+
+export const setVersion = async (version: number): Promise<void> => {
+  await db.execute(
+    "INSERT OR REPLACE INTO schema_version (version) VALUES ($1)",
+    [version]
+  );
+};
+
 export const initDatabase = async () => {
   db = await Database.load("sqlite:projects.db");
-  for (const migration of migrations) {
-    await db.execute(migration);
+
+  const currentVersion = await getCurrentVersion();
+  const pendingMigrations = migrations.filter(
+    (m) => m.version > currentVersion
+  );
+
+  for (const migration of pendingMigrations) {
+    await db.execute(migration.sql);
+    await setVersion(migration.version);
   }
+
   return db;
 };
 
