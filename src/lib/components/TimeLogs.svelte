@@ -6,23 +6,27 @@
   import { deleteTimeLog } from "$lib/db/migrations";
   import { formatSeconds } from "$lib/utils/time";
   import { selectionFeedback } from "@tauri-apps/plugin-haptics";
+  import ManualLogModal from "./ManualLogModal.svelte";
 
   let {
     logs,
     show,
     onUpdate,
     readonly = false,
+    projectId,
   }: {
     logs: TimeLog[];
     show: boolean;
     onUpdate: () => void;
     readonly: boolean;
+    projectId: number;
   } = $props();
 
   const relativeTime = new RelativeTime();
 
   let selectedLog = $state<TimeLog | null>(null);
   let isDrawerOpen = $state(false);
+  let isManualLogModalOpen = $state(false);
 
   const handleLogPress = (log: TimeLog) => {
     if (readonly) return;
@@ -39,6 +43,16 @@
   };
 </script>
 
+<ManualLogModal
+  {projectId}
+  isOpen={isManualLogModalOpen}
+  onClose={() => (isManualLogModalOpen = false)}
+  onUpdate={() => {
+    onUpdate();
+    isManualLogModalOpen = false;
+  }}
+/>
+
 <TimeLogDrawer
   isOpen={isDrawerOpen}
   log={selectedLog!}
@@ -47,22 +61,40 @@
 />
 
 <div class="logs-section">
-  <button
-    class="toggle-logs-btn"
-    onclick={() => {
-      try {
-        selectionFeedback();
-      } catch {}
-      show = !show;
-    }}
-    transition:fade
-  >
-    {show ? "Hide" : "Show"} Time Logs
-  </button>
+  <div class="logs-header">
+    <button
+      class="toggle-logs-btn"
+      onclick={() => {
+        try {
+          selectionFeedback();
+        } catch {}
+        show = !show;
+      }}
+      transition:fade
+    >
+      {show ? "Hide" : "Show"} Time Logs
+    </button>
+  </div>
 
   {#if show && logs.length > 0}
     <div class="logs-container" transition:slide>
-      <h2>Time Logs</h2>
+      <div class="logs-header">
+        <h2>Time Logs</h2>
+        {#if !readonly}
+          <button
+            class="add-manual-log-btn"
+            onclick={() => {
+              try {
+                selectionFeedback();
+              } catch {}
+              isManualLogModalOpen = true;
+            }}
+            transition:fade
+          >
+            Add Manual Log
+          </button>
+        {/if}
+      </div>
       <div class="logs-list">
         {#each logs as log (log.id)}
           <div
@@ -131,10 +163,17 @@
       padding: 1rem;
     }
 
-    h2 {
+    .logs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin: 0 0 1rem 0;
-      font-size: 1.2rem;
-      color: var(--text-color);
+
+      h2 {
+        font-size: 1.2rem;
+        margin: 0;
+        color: var(--text-color);
+      }
     }
   }
 
@@ -203,6 +242,28 @@
 
     .log-time-separator {
       opacity: 0.5;
+    }
+  }
+
+  .logs-header {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .add-manual-log-btn {
+    padding: 0.5rem 1rem;
+    background: #2a9d8f;
+    border: 1px solid #2a9d8f;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #238779;
     }
   }
 </style>

@@ -247,6 +247,19 @@ export const unarchiveProject = async (id: number) => {
   await getDb().execute("UPDATE projects SET archived = 0 WHERE id = $1", [id]);
 };
 
+export const createTimeLog = async (timeLog: {
+  project_id: number;
+  start_time: number;
+  end_time: number;
+}) => {
+  const db = await getDb();
+  const result = await db.select<TimeLog[]>(
+    "INSERT INTO time_logs (project_id, start_time, end_time) VALUES ($1, $2, $3) RETURNING *",
+    [timeLog.project_id, timeLog.start_time, timeLog.end_time]
+  );
+  return result[0];
+};
+
 export type Project = {
   id: number;
   name: string;

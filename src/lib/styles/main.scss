@@ -57,11 +57,12 @@ body {
 }
 
 input[type="text"],
+input[type="datetime-local"],
 textarea {
     &:not(.blank) {
         width: 100%;
         padding: 0.75rem;
-        background-color: var(--surface-color);
+        background-color: var(--menu-color);
         border: 1px solid var(--surface-border-color);
         border-radius: 0.25rem;
         color: var(--text-color);
@@ -77,6 +78,12 @@ textarea {
             color: var(--placeholder-color);
         }
     }
+}
+
+label {
+    color: var(--text-color);
+    margin-bottom: .5rem;
+    display: inline-block;
 }
 
 select {

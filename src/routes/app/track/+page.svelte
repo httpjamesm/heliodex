@@ -229,6 +229,7 @@
           }
         }}
         readonly={project.archived}
+        projectId={project.id}
       />
     {/if}
     <div class="wave-container">
