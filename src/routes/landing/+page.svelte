@@ -87,6 +87,7 @@
     z-index: 1;
     padding: 2rem;
     box-sizing: border-box;
+    overflow: hidden;
 
     .container {
       display: flex;
