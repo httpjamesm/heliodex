@@ -22,6 +22,7 @@
   const handleReset = async () => {
     await resetDatabase();
     isResetModalOpen = false;
+    window.localStorage.clear();
     goto("/");
   };
 
