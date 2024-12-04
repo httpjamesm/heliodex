@@ -2,12 +2,21 @@
   import { fade, slide } from "svelte/transition";
   import { IconX } from "@tabler/icons-svelte";
   import type { Snippet } from "svelte";
+  import { selectionFeedback } from "@tauri-apps/plugin-haptics";
 
   const {
     isOpen = false,
     close,
     children,
   }: { isOpen: boolean; close: () => void; children: Snippet } = $props();
+
+  $effect(() => {
+    if (isOpen) {
+      try {
+        await selectionFeedback();
+      } catch {}
+    }
+  });
 </script>
 
 {#if isOpen}
