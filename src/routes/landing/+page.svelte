@@ -7,6 +7,26 @@
   import { onMount } from "svelte";
   import Wave from "$lib/components/Wave.svelte";
   import { goto } from "$app/navigation";
+  import { spring } from "svelte/motion";
+  import { Pages } from "$lib/pages";
+
+  let scale = spring(1, { stiffness: 0.008, damping: 1 });
+  let overlay = spring(0, { stiffness: 0.006, damping: 1 });
+  let navigating = $state(false);
+  let isExpanding = $state(false);
+
+  const handleClick = async () => {
+    if (navigating) return;
+    navigating = true;
+    isExpanding = true;
+    window.localStorage.setItem("onboarding", "true");
+
+    scale.set(40);
+    overlay.set(1);
+
+    await new Promise((resolve) => setTimeout(resolve, 750));
+    goto(Pages.Home);
+  };
 </script>
 
 <div class="home-arc-container">
@@ -26,14 +46,14 @@
     <div class="track-container">
       <button
         class="track-button working"
-        onclick={() => {
-          window.localStorage.setItem("onboarding", "true");
-          goto("/app");
-        }}
+        on:click={handleClick}
+        style:transform="scale({$scale})"
       >
         <div class="button-content">
           <div class="button-content-inner">
-            <span class="status-text"> Start </span>
+            {#if !isExpanding}
+              <span class="status-text"> Start </span>
+            {/if}
           </div>
         </div>
       </button>
@@ -44,6 +64,12 @@
     </div>
   </div>
 </div>
+
+<div
+  class="overlay"
+  style:opacity={$overlay}
+  style:pointer-events={$overlay === 0 ? "none" : "all"}
+></div>
 
 <style lang="scss">
   .home-arc-container {
@@ -112,22 +138,32 @@
     border: none;
     cursor: pointer;
     background-color: #e63946;
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease;
     position: relative;
     overflow: hidden;
     padding: 3rem;
     box-sizing: border-box;
+    z-index: 10;
 
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
-      transform: none;
     }
   }
 
   .track-button.working {
     background-color: #2a9d8f;
-    animation: pulse 2s infinite;
+  }
+
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #2a9d8f;
+    z-index: 5;
+    pointer-events: none;
   }
 
   .button-content {
@@ -150,21 +186,6 @@
         font-size: 1rem;
         font-weight: 400;
       }
-    }
-  }
-
-  @keyframes pulse {
-    0% {
-      transform: scale(1);
-      box-shadow: 0 0 0 0 rgba(42, 157, 143, 0.4);
-    }
-    70% {
-      transform: scale(1.05);
-      box-shadow: 0 0 0 15px rgba(42, 157, 143, 0);
-    }
-    100% {
-      transform: scale(1);
-      box-shadow: 0 0 0 0 rgba(42, 157, 143, 0);
     }
   }
 </style>
