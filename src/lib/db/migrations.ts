@@ -3,8 +3,7 @@ import Database from "@tauri-apps/plugin-sql";
 export const migrations = [
   `CREATE TABLE IF NOT EXISTS projects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    seconds INTEGER NOT NULL DEFAULT 0
+    name TEXT NOT NULL
   )`,
   `CREATE TABLE IF NOT EXISTS time_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -83,6 +82,21 @@ export const getProjectLogs = async (project_id: number) => {
   return result;
 };
 
+export const getProjectElapsedTime = async (project_id: number) => {
+  const result = await getDb().select<{ total_seconds: number }[]>(
+    `SELECT COALESCE(SUM(
+      CASE 
+        WHEN end_time IS NULL THEN (strftime('%s', 'now') * 1000 - start_time) / 1000
+        ELSE (end_time - start_time) / 1000
+      END
+    ), 0) as total_seconds
+    FROM time_logs 
+    WHERE project_id = $1`,
+    [project_id]
+  );
+  return Math.floor(result[0].total_seconds);
+};
+
 export const getActiveLog = async (project_id: number) => {
   const result = await getDb().select<TimeLog[]>(
     "SELECT * FROM time_logs WHERE project_id = $1 AND end_time IS NULL",
@@ -94,7 +108,6 @@ export const getActiveLog = async (project_id: number) => {
 export type Project = {
   id: number;
   name: string;
-  seconds: number;
 };
 
 export type TimeLog = {

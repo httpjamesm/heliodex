@@ -5,6 +5,7 @@
     startTracking,
     stopTracking,
     getActiveLog,
+    getProjectElapsedTime,
   } from "$lib/db/migrations";
   import { onMount } from "svelte";
   import {
@@ -25,6 +26,8 @@
       $isTracking = true;
       startTime = new Date(activeLog.start_time);
       secsElapsed = Math.floor((Date.now() - activeLog.start_time) / 1000);
+    } else {
+      secsElapsed = await getProjectElapsedTime($selectedProject.id);
     }
   };
 
@@ -38,6 +41,7 @@
     } else if ($activeLogId) {
       await stopTracking($activeLogId);
       $activeLogId = null;
+      secsElapsed = await getProjectElapsedTime($selectedProject.id);
     }
   };
 
