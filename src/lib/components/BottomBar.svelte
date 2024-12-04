@@ -45,7 +45,7 @@
 <style lang="scss">
   .bottom-bar {
     width: 100%;
-    height: 5rem;
+    min-height: 5rem;
     background-color: var(--menu-color);
     border-top: 1px solid var(--surface-border-color);
     display: flex;
