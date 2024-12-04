@@ -25,13 +25,15 @@
     <div class="chart-container">
       <BarChart projects={recentProjects}></BarChart>
     </div>
-    {#each recentProjects as project (project.id)}
-      <ProjectCard
-        id={project.id}
-        name={project.name}
-        refreshProjects={getProjects}
-      />
-    {/each}
+    <div class="project-list">
+      {#each recentProjects as project (project.id)}
+        <ProjectCard
+          id={project.id}
+          name={project.name}
+          refreshProjects={getProjects}
+        />
+      {/each}
+    </div>
   </div>
 </div>
 
@@ -58,6 +60,10 @@
         font-size: 48px;
         line-height: 45px;
         letter-spacing: -0.05em;
+      }
+
+      .project-list {
+        padding-bottom: 2rem;
       }
     }
   }
