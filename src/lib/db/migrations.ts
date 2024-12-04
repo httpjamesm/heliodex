@@ -182,6 +182,10 @@ export const hasOpenTimeLog = async (projectId: number): Promise<boolean> => {
   return result[0].count > 0;
 };
 
+export const deleteTimeLog = async (id: number): Promise<void> => {
+  await getDb().execute("DELETE FROM time_logs WHERE id = $1", [id]);
+};
+
 export type Project = {
   id: number;
   name: string;

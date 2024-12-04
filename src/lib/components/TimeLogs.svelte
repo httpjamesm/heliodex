@@ -2,22 +2,49 @@
   import type { TimeLog } from "$lib/db/migrations";
   import RelativeTime from "@yaireo/relative-time";
   import { fade, slide } from "svelte/transition";
+  import TimeLogDrawer from "./TimeLogDrawer.svelte";
+  import { deleteTimeLog } from "$lib/db/migrations";
 
   let {
     logs,
     show,
+    onUpdate,
   }: {
     logs: TimeLog[];
     show: boolean;
+    onUpdate: () => void;
   } = $props();
 
   const relativeTime = new RelativeTime();
+
+  let selectedLog = $state<TimeLog | null>(null);
+  let isDrawerOpen = $state(false);
+
+  const handleLogPress = (log: TimeLog) => {
+    selectedLog = log;
+    isDrawerOpen = true;
+  };
+
+  const handleDelete = async () => {
+    if (selectedLog) {
+      await deleteTimeLog(selectedLog.id);
+      onUpdate();
+      isDrawerOpen = false;
+    }
+  };
 </script>
+
+<TimeLogDrawer
+  isOpen={isDrawerOpen}
+  log={selectedLog}
+  onClose={() => (isDrawerOpen = false)}
+  onDelete={handleDelete}
+/>
 
 <div class="logs-section">
   <button
     class="toggle-logs-btn"
-    onclick={() => (show = !show)}
+    on:click={() => (show = !show)}
     transition:fade
   >
     {show ? "Hide" : "Show"} Time Logs
@@ -27,8 +54,8 @@
     <div class="logs-container" transition:slide>
       <h2>Time Logs</h2>
       <div class="logs-list">
-        {#each logs as log}
-          <div class="log-item">
+        {#each logs as log (log.id)}
+          <div class="log-item" on:click={() => handleLogPress(log)}>
             <div class="log-date">
               {relativeTime.from(log.start_time)}
             </div>
@@ -154,5 +181,9 @@
     .log-time-separator {
       opacity: 0.5;
     }
+  }
+
+  .log-item {
+    cursor: pointer;
   }
 </style>

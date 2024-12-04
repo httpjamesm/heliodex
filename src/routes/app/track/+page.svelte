@@ -52,6 +52,7 @@
       await selectionFeedback();
     } catch {}
     if (!project) return;
+    secsElapsed = 0;
 
     $isTracking = !$isTracking;
     if ($isTracking) {
@@ -66,9 +67,10 @@
     } else if ($activeLogId) {
       await stopTracking($activeLogId);
       $activeLogId = null;
-      secsElapsed = 0;
     }
 
+    // update logs
+    loadLogs();
     // if not tracking, clear the pulse interval
     cleanup();
   };
@@ -195,7 +197,13 @@
     </div>
 
     {#if project && !$isTracking && logs.length > 0}
-      <TimeLogs {logs} show={showLogs} />
+      <TimeLogs
+        {logs}
+        show={showLogs}
+        onUpdate={() => {
+          loadLogs();
+        }}
+      />
     {/if}
     <div class="wave-container">
       <Wave
