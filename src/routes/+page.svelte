@@ -1,5 +1,6 @@
 <script lang="ts">
   import HomeArc from "$lib/components/HomeArc.svelte";
+  import ProjectCard from "$lib/components/ProjectCard.svelte";
 </script>
 
 <div class="home-arc-container">
@@ -9,6 +10,8 @@
 <div class="wrapper">
   <div class="container">
     <h1>Let's get some<br />work done.</h1>
+    <ProjectCard name="Web Design Project" hours={5.34} />
+    <ProjectCard name="Blindr Project" hours={23.19} />
   </div>
 </div>
 
