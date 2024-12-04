@@ -13,7 +13,7 @@
   $effect(() => {
     if (isOpen) {
       try {
-        await selectionFeedback();
+        selectionFeedback();
       } catch {}
     }
   });

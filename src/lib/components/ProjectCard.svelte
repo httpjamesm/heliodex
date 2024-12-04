@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { getProjectElapsedTime } from "$lib/db/migrations";
-  import { activeProjectId } from "$lib/stores/project";
-  import { IconArrowRight } from "@tabler/icons-svelte";
+  import { getProjectElapsedTime, hasOpenTimeLog } from "$lib/db/migrations";
   import { goto } from "$app/navigation";
   import ProjectDrawer from "./ProjectDrawer.svelte";
   import { deleteProject, renameProject } from "$lib/db/migrations";
+  import { selectionFeedback } from "@tauri-apps/plugin-haptics";
   import { Pages } from "$lib/pages";
+  import { IconArrowRight } from "@tabler/icons-svelte";
+
   let {
     name,
     id,
@@ -22,6 +23,7 @@
   let isDrawerOpen = $state(false);
   let pressTimer: number | undefined = $state(undefined);
   let isPressing = $state(false);
+  let isTracking = $state(false);
 
   const getColorFromName = (name: string) => {
     const hash = Array.from(name).reduce((acc, char) => {
@@ -33,18 +35,17 @@
   };
 
   let color = $derived(getColorFromName(name));
-  let isActive = $derived($activeProjectId === id);
 
   $effect(() => {
-    const loadTime = async () => {
+    const loadData = async () => {
       const time = await getProjectElapsedTime(id);
       hours = time / 3600;
+      isTracking = await hasOpenTimeLog(id);
     };
-    loadTime();
+    loadData();
   });
 
   const startTracking = () => {
-    activeProjectId.set(id);
     goto(Pages.Track);
   };
 
@@ -96,7 +97,7 @@
 
 <div
   class="project-card"
-  class:active={isActive}
+  class:active={isTracking}
   class:pressing={isPressing}
   onpointerdown={handlePointerDown}
   onpointerup={handlePointerUp}

@@ -173,6 +173,15 @@ export const resetDatabase = async () => {
   await getDb().execute("DELETE FROM projects");
 };
 
+export const hasOpenTimeLog = async (projectId: number): Promise<boolean> => {
+  const db = getDb();
+  const result = await db.select<{ count: number }[]>(
+    "SELECT COUNT(*) as count FROM time_logs WHERE project_id = $1 AND end_time IS NULL",
+    [projectId]
+  );
+  return result[0].count > 0;
+};
+
 export type Project = {
   id: number;
   name: string;
