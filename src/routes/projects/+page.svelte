@@ -74,11 +74,12 @@
   </div>
 
   <div class="projects-grid">
-    {#each filteredProjects as project}
+    {#each filteredProjects as project (project.id)}
       <ProjectCard
         name={project.name}
         id={project.id}
         onclick={() => selectProject(project)}
+        refreshProjects={loadProjects}
       />
     {/each}
   </div>

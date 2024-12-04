@@ -25,7 +25,7 @@
     <div class="modal" in:fly={{ y: 100 }} out:fly={{ y: 100 }}>
       <div class="modal-header">
         <h2>{title}</h2>
-        <button class="close-button" on:click={onClose}>
+        <button class="close-button" onclick={onClose}>
           <IconX size={20} />
         </button>
       </div>
@@ -33,8 +33,8 @@
         {@render children?.()}
       </div>
       <div class="modal-actions">
-        <button class="cancel" on:click={onClose}>Cancel</button>
-        <button class="confirm" on:click={onConfirm}
+        <button class="cancel" onclick={onClose}>Cancel</button>
+        <button class="confirm" onclick={onConfirm}
           >{confirmText ?? "Confirm"}</button
         >
       </div>

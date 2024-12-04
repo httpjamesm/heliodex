@@ -161,6 +161,13 @@ export const getProjectTimesForDate = async (date: Date) => {
   return result;
 };
 
+export const renameProject = async (id: number, name: string) => {
+  await getDb().execute("UPDATE projects SET name = $1 WHERE id = $2", [
+    name,
+    id,
+  ]);
+};
+
 export const resetDatabase = async () => {
   await getDb().execute("DELETE FROM time_logs");
   await getDb().execute("DELETE FROM projects");

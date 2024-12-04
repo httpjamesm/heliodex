@@ -25,8 +25,12 @@
     <div class="chart-container">
       <BarChart projects={recentProjects}></BarChart>
     </div>
-    {#each recentProjects as project}
-      <ProjectCard id={project.id} name={project.name}></ProjectCard>
+    {#each recentProjects as project (project.id)}
+      <ProjectCard
+        id={project.id}
+        name={project.name}
+        refreshProjects={loadProjects}
+      />
     {/each}
   </div>
 </div>
