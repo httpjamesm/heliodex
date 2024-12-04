@@ -80,46 +80,80 @@
 </script>
 
 <div class="container">
-  <button
-    class="track-button"
-    class:working={$isTracking}
-    onclick={toggleWorking}
-    disabled={!$selectedProject}
-  >
-    <div class="button-content">
-      <div class="button-content-inner">
-        <span class="status-text">
-          {#if !$selectedProject}
-            No project selected
-          {:else if $isTracking}
-            {workStatusTexts[
-              Math.floor(Math.random() * workStatusTexts.length)
-            ]}
-          {:else}
-            Click to start
-          {/if}
-        </span>
-        {#if secsElapsed > 0}
-          <span class="time-elapsed"> {secsElapsed}s </span>
-        {/if}
-      </div>
-    </div>
-  </button>
-</div>
+  <div class="header">
+    <h1>Track <span class="project-name">{$selectedProject?.name}</span></h1>
+  </div>
 
-<div class="wave-container">
-  <Wave
-    speed={$isTracking ? 3 : 0}
-    color={$isTracking ? "42, 157, 143" : "130, 130, 130"}
-  />
+  <div class="track-container">
+    <button
+      class="track-button"
+      class:working={$isTracking}
+      onclick={toggleWorking}
+      disabled={!$selectedProject}
+    >
+      <div class="button-content">
+        <div class="button-content-inner">
+          <span class="status-text">
+            {#if !$selectedProject}
+              No project selected
+            {:else if $isTracking}
+              {workStatusTexts[
+                Math.floor(Math.random() * workStatusTexts.length)
+              ]}
+            {:else}
+              Click to start
+            {/if}
+          </span>
+          {#if secsElapsed > 0}
+            <span class="time-elapsed"> {secsElapsed}s </span>
+          {/if}
+        </div>
+      </div>
+    </button>
+  </div>
+
+  <div class="wave-container">
+    <Wave
+      speed={$isTracking ? 3 : 0}
+      color={$isTracking ? "42, 157, 143" : "130, 130, 130"}
+    />
+  </div>
 </div>
 
 <style lang="scss">
   .container {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    position: relative;
+    height: 100%;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 500;
+      margin: 0;
+    }
+  }
+
+  .project-name {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #666;
+  }
+
+  .track-container {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    width: 100%;
   }
 
   .track-button {
