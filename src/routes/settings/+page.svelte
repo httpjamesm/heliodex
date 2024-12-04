@@ -2,6 +2,8 @@
   import { resetDatabase, getDb, type TimeLog } from "$lib/db/migrations";
   import Modal from "$lib/components/Modal.svelte";
   import { goto } from "$app/navigation";
+  import { save } from "@tauri-apps/plugin-dialog";
+  import { writeTextFile, BaseDirectory } from "@tauri-apps/plugin-fs";
 
   let isResetModalOpen = $state(false);
   let isImportModalOpen = $state(false);
@@ -65,6 +67,48 @@
       importError = error instanceof Error ? error.message : "Import failed";
     }
   };
+
+  const handleExport = async () => {
+    try {
+      const db = getDb();
+      const timeLogs = await db.select<{
+        project_name: string;
+        start_time: number;
+        end_time: number;
+      }>(
+        `SELECT p.name as project_name, t.start_time, t.end_time 
+         FROM time_logs t 
+         JOIN projects p ON t.project_id = p.id 
+         ORDER BY t.start_time`
+      );
+
+      const csvContent = [
+        "project,start,end",
+        ...timeLogs.map(
+          (log) =>
+            `${log.project_name},${Math.floor(log.start_time / 1000)},${Math.floor(
+              log.end_time / 1000
+            )}`
+        ),
+      ].join("\n");
+
+      const filePath = await save({
+        defaultPath: `time_logs_${new Date().toISOString().split("T")[0]}.csv`,
+        filters: [
+          {
+            name: "CSV Files",
+            extensions: ["csv"],
+          },
+        ],
+      });
+
+      if (filePath) {
+        await writeTextFile(filePath, csvContent);
+      }
+    } catch (error) {
+      console.error("Failed to export:", error);
+    }
+  };
 </script>
 
 <div class="container">
@@ -81,6 +125,7 @@
       <button on:click={() => (isImportModalOpen = true)}>
         Import Time Logs
       </button>
+      <button on:click={handleExport}> Export Time Logs </button>
     </div>
   </div>
 

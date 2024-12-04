@@ -7,6 +7,10 @@
     "core:default",
     "shell:allow-open",
     "sql:default",
-    "sql:allow-execute"
+    "sql:allow-execute",
+    "fs:default",
+    "fs:allow-write-text-file",
+    "fs:allow-read-text-file",
+    "dialog:default"
   ]
 }
