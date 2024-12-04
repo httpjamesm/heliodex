@@ -3,8 +3,19 @@
   import ProjectCard from "$lib/components/ProjectCard.svelte";
   import FAB from "$lib/components/FAB.svelte";
   import Modal from "$lib/components/Modal.svelte";
-  import { getProjects, addProject, type Project } from "$lib/db/migrations";
+  import {
+    getProjects,
+    addProject,
+    type Project,
+    getActiveLog,
+  } from "$lib/db/migrations";
   import { onMount } from "svelte";
+  import {
+    selectedProject,
+    isTracking,
+    activeLogId,
+  } from "$lib/stores/project";
+  import { goto } from "$app/navigation";
 
   let searchQuery = $state("");
   let projects = $state<Project[]>([]);
@@ -29,8 +40,21 @@
     isModalOpen = false;
   };
 
-  onMount(() => {
-    loadProjects();
+  const selectProject = async (project: Project) => {
+    $selectedProject = project;
+    const activeLog = await getActiveLog(project.id);
+    if (activeLog) {
+      $activeLogId = activeLog.id;
+      $isTracking = true;
+    } else {
+      $activeLogId = null;
+      $isTracking = false;
+    }
+    goto("/track");
+  };
+
+  onMount(async () => {
+    await loadProjects();
   });
 </script>
 
@@ -54,6 +78,7 @@
         name={project.name}
         hours={project.seconds / 3600}
         id={project.id}
+        onclick={() => selectProject(project)}
       />
     {/each}
   </div>

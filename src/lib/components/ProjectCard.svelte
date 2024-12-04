@@ -1,5 +1,7 @@
 <script lang="ts">
   import { IconArrowRight } from "@tabler/icons-svelte";
+  import { selectedProject } from "$lib/stores/project";
+
   interface Props {
     name: string;
     hours: number;
@@ -20,16 +22,19 @@
 
   const color = $derived(getColorFromName(name));
   const formattedHours = $derived(hours.toFixed(2));
+  const isActive = $derived($selectedProject?.id === id);
 </script>
 
-<a class="card" href={`/track?project_id=${id}`} {onclick}>
-  <div class="color-bar" style:background-color={color}></div>
-  <div class="content">
-    <h2>{name}</h2>
-    <p>{formattedHours} hours <span>so far</span></p>
+<button class="card" class:active={isActive} {onclick}>
+  <div class="left">
+    <div class="color-bar" style:background-color={color}></div>
+    <div class="content">
+      <h2>{name}</h2>
+      <p>{formattedHours} hours <span>so far</span></p>
+    </div>
   </div>
   <div class="arrow"><IconArrowRight /></div>
-</a>
+</button>
 
 <style lang="scss">
   .card {
@@ -39,17 +44,35 @@
     box-sizing: border-box;
     margin: 0.5rem 0;
     display: flex;
+    justify-content: space-between;
+    align-items: center;
     gap: 1rem;
     text-decoration: none;
     color: inherit;
     position: relative;
     border: 1px solid var(--surface-border-color);
     overflow: hidden;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &.active {
+      border-color: #2a9d8f;
+      box-shadow: 0 0 0 1px #2a9d8f;
+    }
+
+    .left {
+      text-align: left;
+      display: flex;
+      gap: 1rem;
+      flex: 1;
+    }
   }
 
   .color-bar {
     width: 4px;
     border-radius: 2px;
+    min-height: 100%;
   }
 
   .content {

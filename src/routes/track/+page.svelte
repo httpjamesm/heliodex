@@ -2,56 +2,58 @@
   import Wave from "$lib/components/Wave.svelte";
   import {
     getProjects,
-    type Project,
     startTracking,
     stopTracking,
     getActiveLog,
   } from "$lib/db/migrations";
   import { onMount } from "svelte";
-  import { page } from "$app/stores";
+  import {
+    selectedProject,
+    isTracking,
+    activeLogId,
+  } from "$lib/stores/project";
 
-  let isWorking = $state(false);
   let startTime: Date | null = $state(null);
   let secsElapsed = $state(0);
   let elapsedInterval: number | null = $state(null);
-  let project = $state<Project | null>(null);
-  let activeLogId = $state<number | null>(null);
 
-  const loadProject = async () => {
-    const projectId = Number($page.url.searchParams.get("project_id"));
-    if (!projectId) return;
-
-    const projects = await getProjects();
-    project = projects.find((p) => p.id === projectId) ?? null;
-
-    const activeLog = await getActiveLog(projectId);
+  const loadActiveLog = async () => {
+    if (!$selectedProject) return;
+    const activeLog = await getActiveLog($selectedProject.id);
     if (activeLog) {
-      activeLogId = activeLog.id;
-      isWorking = true;
+      $activeLogId = activeLog.id;
+      $isTracking = true;
+      startTime = new Date(activeLog.start_time);
+      secsElapsed = Math.floor((Date.now() - activeLog.start_time) / 1000);
     }
   };
 
   const toggleWorking = async () => {
-    if (!project) return;
+    if (!$selectedProject) return;
 
-    isWorking = !isWorking;
-    if (isWorking) {
-      activeLogId = await startTracking(project.id);
-    } else if (activeLogId) {
-      await stopTracking(activeLogId);
-      activeLogId = null;
+    $isTracking = !$isTracking;
+    if ($isTracking) {
+      startTime = new Date();
+      $activeLogId = await startTracking($selectedProject.id);
+    } else if ($activeLogId) {
+      await stopTracking($activeLogId);
+      $activeLogId = null;
     }
   };
 
   $effect(() => {
-    if (isWorking) {
-      startTime = new Date();
-      elapsedInterval = setInterval(() => {
-        secsElapsed = Math.floor(
-          (new Date().getTime() - startTime?.getTime()!) / 1000
-        );
-      }, 1000);
+    if ($isTracking) {
+      document.title = `Working - ${$selectedProject?.name}`;
+      if (!elapsedInterval) {
+        elapsedInterval = setInterval(() => {
+          if (!startTime) return;
+          secsElapsed = Math.floor(
+            (new Date().getTime() - startTime.getTime()) / 1000
+          );
+        }, 1000);
+      }
     } else {
+      document.title = "Paused - Track";
       if (elapsedInterval) {
         clearInterval(elapsedInterval);
         elapsedInterval = null;
@@ -60,7 +62,7 @@
   });
 
   onMount(() => {
-    loadProject();
+    loadActiveLog();
   });
 
   const workStatusTexts = [
@@ -80,24 +82,24 @@
 <div class="container">
   <button
     class="track-button"
-    class:working={isWorking}
+    class:working={$isTracking}
     onclick={toggleWorking}
-    disabled={!project}
+    disabled={!$selectedProject}
   >
     <div class="button-content">
       <div class="button-content-inner">
         <span class="status-text">
-          {#if !project}
+          {#if !$selectedProject}
             No project selected
-          {:else if isWorking}
+          {:else if $isTracking}
             {workStatusTexts[
               Math.floor(Math.random() * workStatusTexts.length)
             ]}
           {:else}
-            Paused
+            Click to start
           {/if}
         </span>
-        {#if secsElapsed > 0 && isWorking}
+        {#if secsElapsed > 0}
           <span class="time-elapsed"> {secsElapsed}s </span>
         {/if}
       </div>
@@ -107,8 +109,8 @@
 
 <div class="wave-container">
   <Wave
-    speed={isWorking ? 3 : 0}
-    color={isWorking ? "42, 157, 143" : "130, 130, 130"}
+    speed={$isTracking ? 3 : 0}
+    color={$isTracking ? "42, 157, 143" : "130, 130, 130"}
   />
 </div>
 
