@@ -8,7 +8,6 @@
   import { goto } from "$app/navigation";
   import ProjectDrawer from "./ProjectDrawer.svelte";
   import { deleteProject, renameProject } from "$lib/db/migrations";
-  import { selectionFeedback } from "@tauri-apps/plugin-haptics";
   import { Pages } from "$lib/pages";
   import { IconArrowRight } from "@tabler/icons-svelte";
 

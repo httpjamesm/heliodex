@@ -3,8 +3,16 @@
   import ProjectCard from "$lib/components/ProjectCard.svelte";
   import BarChart from "$lib/components/BarChart.svelte";
   import type { Project } from "$lib/db/migrations";
-  import { getProjects } from "$lib/db/migrations";
+  import { getActiveLog, getProjects } from "$lib/db/migrations";
   import { onMount } from "svelte";
+  import { selectionFeedback } from "@tauri-apps/plugin-haptics";
+  import { goto } from "$app/navigation";
+  import { Pages } from "$lib/pages";
+  import {
+    activeLogId,
+    isTracking,
+    activeProjectId,
+  } from "$lib/stores/project";
 
   let recentProjects = $state<Project[]>([]);
 
@@ -32,6 +40,22 @@
           name={project.name}
           refreshProjects={getProjects}
           disableDrawer
+          archived={false}
+          onclick={async () => {
+            try {
+              selectionFeedback();
+            } catch {}
+            activeProjectId.set(project.id);
+            const activeLog = await getActiveLog(project.id);
+            if (activeLog) {
+              activeLogId.set(activeLog.id);
+              isTracking.set(true);
+            } else {
+              activeLogId.set(null);
+              isTracking.set(false);
+            }
+            goto(Pages.Track);
+          }}
         />
       {/each}
     </div>

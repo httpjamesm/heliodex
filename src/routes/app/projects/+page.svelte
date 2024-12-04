@@ -43,14 +43,17 @@
   };
 
   const selectProject = async (project: Project) => {
+    try {
+      selectionFeedback();
+    } catch {}
     activeProjectId.set(project.id);
     const activeLog = await getActiveLog(project.id);
     if (activeLog) {
-      $activeLogId = activeLog.id;
-      $isTracking = true;
+      activeLogId.set(activeLog.id);
+      isTracking.set(true);
     } else {
-      $activeLogId = null;
-      $isTracking = false;
+      activeLogId.set(null);
+      isTracking.set(false);
     }
     goto(Pages.Track);
   };
