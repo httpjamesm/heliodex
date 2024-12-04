@@ -74,6 +74,7 @@
       type="text"
       placeholder="Search projects..."
       bind:value={searchQuery}
+      class="blank"
     />
   </div>
 
@@ -149,26 +150,6 @@
       &::placeholder {
         color: rgba(244, 244, 244, 0.5);
       }
-    }
-  }
-
-  .project-name-input {
-    width: 100%;
-    padding: 0.75rem;
-    background-color: var(--surface-color);
-    border: 1px solid var(--surface-border-color);
-    border-radius: 0.25rem;
-    color: var(--text-color);
-    font-size: 1rem;
-    outline: none;
-    box-sizing: border-box;
-
-    &:focus {
-      border-color: #2a9d8f;
-    }
-
-    &::placeholder {
-      color: rgba(244, 244, 244, 0.5);
     }
   }
 </style>
