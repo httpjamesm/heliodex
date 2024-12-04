@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { IconPlus, IconSearch } from "@tabler/icons-svelte";
+  import { IconPlus, IconSearch, IconArchive } from "@tabler/icons-svelte";
   import ProjectCard from "$lib/components/ProjectCard.svelte";
   import FAB from "$lib/components/FAB.svelte";
   import Modal from "$lib/components/Modal.svelte";
@@ -22,6 +22,7 @@
   let projects = $state<Project[]>([]);
   let isModalOpen = $state(false);
   let newProjectName = $state("");
+  let showArchived = $state(false);
 
   let filteredProjects = $derived(
     projects.filter((project) =>
@@ -30,7 +31,7 @@
   );
 
   const loadProjects = async () => {
-    projects = await getProjects();
+    projects = await getProjects(showArchived);
   };
 
   const handleAddProject = async () => {
@@ -54,14 +55,21 @@
     goto(Pages.Track);
   };
 
-  onMount(async () => {
-    await loadProjects();
+  $effect(() => {
+    loadProjects();
   });
 </script>
 
 <div class="container">
   <div class="header">
     <h1>Projects</h1>
+    <button
+      class="archive-toggle"
+      onclick={() => (showArchived = !showArchived)}
+    >
+      <IconArchive size={20} />
+      {showArchived ? "Hide Archived" : "Show Archived"}
+    </button>
   </div>
 
   <div class="search-container">
@@ -79,6 +87,7 @@
       <ProjectCard
         name={project.name}
         id={project.id}
+        archived={project.archived}
         onclick={() => selectProject(project)}
         refreshProjects={loadProjects}
       />
@@ -121,6 +130,23 @@
       font-size: 2rem;
       font-weight: 500;
       margin: 0;
+    }
+
+    .archive-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      background-color: var(--surface-color);
+      border: 1px solid var(--surface-border-color);
+      color: var(--text-color);
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: var(--surface-hover-color);
+      }
     }
   }
 

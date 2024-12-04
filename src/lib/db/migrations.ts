@@ -12,6 +12,7 @@ export const migrations = [
     end_time INTEGER,
     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
   )`,
+  `ALTER TABLE projects ADD COLUMN archived INTEGER NOT NULL DEFAULT 0`,
 ];
 
 let db: Database;
@@ -33,34 +34,33 @@ export const getDb = () => {
 
 export const getProject = async (id: number) => {
   const result = await getDb().select<Project[]>(
-    "SELECT * FROM projects WHERE id = $1",
+    "SELECT id, name, archived != 0 as archived FROM projects WHERE id = $1",
     [id]
   );
   return result[0];
 };
 
-export const getProjects = async () => {
-  const result = await getDb().select<Project[]>("SELECT * FROM projects");
+export const getProjects = async (includeArchived = false) => {
+  const result = await getDb().select<Project[]>(
+    "SELECT id, name, archived != 0 as archived FROM projects WHERE archived = 0 OR archived = $1 ORDER BY archived, name",
+    [includeArchived ? 1 : 0]
+  );
   return result;
 };
 
 export const addProject = async (name: string) => {
   const result = await getDb().execute(
-    "INSERT INTO projects (name) VALUES ($1)",
+    "INSERT INTO projects (name, archived) VALUES ($1, 0)",
     [name]
   );
   return result.lastInsertId;
 };
 
-export const updateProject = async (
-  id: number,
-  name: string,
-  seconds: number
-) => {
-  await getDb().execute(
-    "UPDATE projects SET name = $1, seconds = $2 WHERE id = $3",
-    [name, seconds, id]
-  );
+export const updateProject = async (id: number, name: string) => {
+  await getDb().execute("UPDATE projects SET name = $1 WHERE id = $2", [
+    name,
+    id,
+  ]);
 };
 
 export const deleteProject = async (id: number) => {
@@ -68,6 +68,10 @@ export const deleteProject = async (id: number) => {
 };
 
 export const startTracking = async (project_id: number) => {
+  const project = await getProject(project_id);
+  if (project?.archived) {
+    throw new Error("Cannot track time for archived projects");
+  }
   const result = await getDb().execute(
     "INSERT INTO time_logs (project_id, start_time) VALUES ($1, $2)",
     [project_id, Date.now()]
@@ -186,9 +190,18 @@ export const deleteTimeLog = async (id: number): Promise<void> => {
   await getDb().execute("DELETE FROM time_logs WHERE id = $1", [id]);
 };
 
+export const archiveProject = async (id: number) => {
+  await getDb().execute("UPDATE projects SET archived = 1 WHERE id = $1", [id]);
+};
+
+export const unarchiveProject = async (id: number) => {
+  await getDb().execute("UPDATE projects SET archived = 0 WHERE id = $1", [id]);
+};
+
 export type Project = {
   id: number;
   name: string;
+  archived: boolean;
 };
 
 export type TimeLog = {

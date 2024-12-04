@@ -10,10 +10,12 @@
     logs,
     show,
     onUpdate,
+    readonly = false,
   }: {
     logs: TimeLog[];
     show: boolean;
     onUpdate: () => void;
+    readonly: boolean;
   } = $props();
 
   const relativeTime = new RelativeTime();
@@ -22,6 +24,7 @@
   let isDrawerOpen = $state(false);
 
   const handleLogPress = (log: TimeLog) => {
+    if (readonly) return;
     selectedLog = log;
     isDrawerOpen = true;
   };
@@ -56,7 +59,11 @@
       <h2>Time Logs</h2>
       <div class="logs-list">
         {#each logs as log (log.id)}
-          <div class="log-item" on:click={() => handleLogPress(log)}>
+          <div
+            class="log-item"
+            class:readonly
+            on:click={() => handleLogPress(log)}
+          >
             <div class="log-date">
               {relativeTime.from(log.start_time)}
             </div>
@@ -135,6 +142,11 @@
     background: var(--menu-color);
     border: 1px solid var(--surface-border-color);
     border-radius: 4px;
+    cursor: pointer;
+
+    &.readonly {
+      cursor: default;
+    }
 
     @media (min-width: 640px) {
       flex-direction: row;
@@ -182,9 +194,5 @@
     .log-time-separator {
       opacity: 0.5;
     }
-  }
-
-  .log-item {
-    cursor: pointer;
   }
 </style>

@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { getProjectElapsedTime, hasOpenTimeLog } from "$lib/db/migrations";
+  import {
+    getProjectElapsedTime,
+    hasOpenTimeLog,
+    archiveProject,
+    unarchiveProject,
+  } from "$lib/db/migrations";
   import { goto } from "$app/navigation";
   import ProjectDrawer from "./ProjectDrawer.svelte";
   import { deleteProject, renameProject } from "$lib/db/migrations";
@@ -10,11 +15,13 @@
   let {
     name,
     id,
+    archived = false,
     onclick,
     refreshProjects,
   }: {
     name: string;
     id: number;
+    archived: boolean;
     onclick: () => void;
     refreshProjects: () => void;
   } = $props();
@@ -85,20 +92,36 @@
     isDrawerOpen = false;
     refreshProjects();
   };
+
+  const handleArchive = async () => {
+    await archiveProject(id);
+    isDrawerOpen = false;
+    refreshProjects();
+  };
+
+  const handleUnarchive = async () => {
+    await unarchiveProject(id);
+    isDrawerOpen = false;
+    refreshProjects();
+  };
 </script>
 
 <ProjectDrawer
   isOpen={isDrawerOpen}
   {name}
+  {archived}
   onClose={() => (isDrawerOpen = false)}
   onRename={handleRename}
   onDelete={handleDelete}
+  onArchive={handleArchive}
+  onUnarchive={handleUnarchive}
 />
 
 <div
   class="project-card"
   class:active={isTracking}
   class:pressing={isPressing}
+  class:archived
   onpointerdown={handlePointerDown}
   onpointerup={handlePointerUp}
   onpointerleave={handlePointerLeave}
@@ -137,6 +160,10 @@
 
     &.pressing {
       transform: scale(0.98);
+    }
+
+    &.archived {
+      opacity: 0.6;
     }
   }
 

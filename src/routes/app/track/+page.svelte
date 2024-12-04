@@ -36,6 +36,12 @@
 
   const loadActiveLog = async () => {
     if (!project) return;
+    if (project.archived) {
+      $isTracking = false;
+      $activeLogId = null;
+      secsElapsed = await getProjectElapsedTime(project.id);
+      return;
+    }
     const activeLog = await getActiveLog(project.id);
     if (activeLog) {
       $activeLogId = activeLog.id;
@@ -119,6 +125,9 @@
           goto(Pages.Projects);
         }
         await loadActiveLog();
+        if (project.archived) {
+          showLogs = true;
+        }
       };
       loadProject();
     }
@@ -159,28 +168,35 @@
 
     <div class="track-container">
       {#if project}
-        <button
-          class="track-button"
-          class:working={$isTracking}
-          onclick={toggleWorking}
-        >
-          <div class="button-content">
-            <div class="button-content-inner">
-              <span class="status-text">
-                {#if $isTracking}
-                  {workStatusTexts[
-                    Math.floor(Math.random() * workStatusTexts.length)
-                  ]}
-                {:else}
-                  Paused
-                {/if}
-              </span>
-              {#if secsElapsed > 0}
-                <span class="time-elapsed"> {formatSeconds(secsElapsed)} </span>
-              {/if}
-            </div>
+        {#if project.archived}
+          <div class="archived-notice">
+            <span>Archived</span>
+            <span class="time-elapsed">{formatSeconds(secsElapsed)}</span>
           </div>
-        </button>
+        {:else}
+          <button
+            class="track-button"
+            class:working={$isTracking}
+            onclick={toggleWorking}
+          >
+            <div class="button-content">
+              <div class="button-content-inner">
+                <span class="status-text">
+                  {#if $isTracking}
+                    {workStatusTexts[
+                      Math.floor(Math.random() * workStatusTexts.length)
+                    ]}
+                  {:else}
+                    Paused
+                  {/if}
+                </span>
+                {#if secsElapsed > 0}
+                  <span class="time-elapsed">{formatSeconds(secsElapsed)}</span>
+                {/if}
+              </div>
+            </div>
+          </button>
+        {/if}
       {:else}
         <button
           class="no-project"
@@ -196,13 +212,16 @@
       {/if}
     </div>
 
-    {#if project && !$isTracking && logs.length > 0}
+    {#if project && logs.length > 0}
       <TimeLogs
         {logs}
         show={showLogs}
         onUpdate={() => {
-          loadLogs();
+          if (!project?.archived) {
+            loadLogs();
+          }
         }}
+        readonly={project.archived}
       />
     {/if}
     <div class="wave-container">
@@ -254,51 +273,46 @@
     width: 100%;
   }
 
+  .archived-notice {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background-color: var(--surface-color);
+    border: 1px solid var(--surface-border-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--text-secondary-color);
+  }
+
   .track-button {
     width: 200px;
     height: 200px;
     border-radius: 50%;
+    background-color: #e63946;
     border: none;
     cursor: pointer;
-    background-color: #e63946;
     transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    padding: 3rem;
-    box-sizing: border-box;
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-  }
-
-  .track-button.working {
-    background-color: #2a9d8f;
-    animation: pulse 2s infinite;
-  }
-
-  .button-content {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    position: relative;
+    overflow: hidden;
     color: white;
-    font-size: 1.5rem;
-    font-weight: 600;
 
-    .button-content-inner {
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    &.working {
+      background-color: #2a9d8f;
+      animation: pulse 2s infinite;
+    }
 
-      .time-elapsed {
-        font-size: 1rem;
-        font-weight: 400;
-      }
+    &:hover {
+      transform: scale(1.02);
+    }
+
+    &:active {
+      transform: scale(0.98);
     }
   }
 
@@ -317,20 +331,31 @@
     }
   }
 
-  .track-button:not(:disabled):hover {
-    transform: scale(1.02);
+  .button-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-align: center;
   }
 
-  .track-button:not(:disabled):active {
-    transform: scale(0.98);
+  .button-content-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
-  .wave-container {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    z-index: 0;
-    width: 100%;
+  .status-text {
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+
+  .time-elapsed {
+    font-size: 1rem;
+    opacity: 0.8;
   }
 
   .no-project {
@@ -341,10 +366,26 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
     color: white;
-    font-size: 1.2rem;
-    text-align: center;
-    padding: 1rem;
-    border: none;
+    font-size: 1.25rem;
+    font-weight: 500;
+
+    &:hover {
+      transform: scale(1.02);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  .wave-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 0;
+    width: 100%;
   }
 </style>

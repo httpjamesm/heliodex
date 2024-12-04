@@ -1,32 +1,48 @@
 <script lang="ts">
   import Drawer from "./Drawer.svelte";
   import MenuItems from "./MenuItems.svelte";
-  import { IconEdit, IconTrash } from "@tabler/icons-svelte";
+  import {
+    IconEdit,
+    IconTrash,
+    IconArchive,
+    IconArchiveOff,
+  } from "@tabler/icons-svelte";
   import DeleteProjectModal from "./DeleteProjectModal.svelte";
   import RenameProjectModal from "./RenameProjectModal.svelte";
 
   let {
     isOpen = false,
     name,
+    archived = false,
     onClose,
     onRename,
     onDelete,
+    onArchive,
+    onUnarchive,
   }: {
     isOpen: boolean;
     name: string;
+    archived: boolean;
     onClose: () => void;
     onRename: (newName: string) => void;
     onDelete: () => void;
+    onArchive: () => void;
+    onUnarchive: () => void;
   } = $props();
 
   let showRenameModal = $state(false);
   let showDeleteModal = $state(false);
 
-  const menuItems = [
+  let menuItems = $derived([
     {
       icon: IconEdit,
       label: "Rename Project",
       onClick: () => (showRenameModal = true),
+    },
+    {
+      icon: archived ? IconArchiveOff : IconArchive,
+      label: archived ? "Unarchive Project" : "Archive Project",
+      onClick: archived ? onUnarchive : onArchive,
     },
     {
       icon: IconTrash,
@@ -34,7 +50,7 @@
       onClick: () => (showDeleteModal = true),
       variant: "danger" as const,
     },
-  ];
+  ]);
 </script>
 
 <Drawer {isOpen} close={onClose}>
