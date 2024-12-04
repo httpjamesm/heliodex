@@ -5,6 +5,7 @@
     --surface-hover-color: #262626;
     --menu-color: #090909;
     --text-color: #F4F4F4;
+    --placeholder-color: #484848;
 }
 
 @media (prefers-color-scheme: light) {
@@ -15,6 +16,7 @@
         --surface-hover-color: #E8E8E8;
         --menu-color: #F4F4F4;
         --text-color: #1C1C1C;
+        --placeholder-color: #484848;
     }
 }
 
@@ -25,6 +27,7 @@
     --surface-hover-color: #E8E8E8;
     --menu-color: #F4F4F4;
     --text-color: #1C1C1C;
+    --placeholder-color: #484848;
 }
 
 * {
@@ -64,7 +67,7 @@ textarea {
         }
 
         &::placeholder {
-            color: rgba(244, 244, 244, 0.5);
+            color: var(--placeholder-color);
         }
     }
 }

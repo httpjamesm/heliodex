@@ -143,7 +143,7 @@
       width: 100%;
 
       &::placeholder {
-        color: rgba(244, 244, 244, 0.5);
+        color: var(--placeholder-color);
       }
     }
   }
