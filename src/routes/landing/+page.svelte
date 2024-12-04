@@ -40,8 +40,8 @@
       />resource.
     </h1>
     <h2>
-      <strong>Keep track of it.</strong> Import all your projects and log your hours
-      simply with the tap of a button.
+      <strong>Keep track of it.</strong> Easily log your hours per project with the
+      tap of a button.
     </h2>
     <div class="track-container">
       <button
