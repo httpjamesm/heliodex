@@ -82,7 +82,7 @@
             </div>
             <div class="log-duration">
               {formatSeconds(
-                (log.end_time || new Date().getTime() - log.start_time) / 1000
+                ((log.end_time || new Date().getTime()) - log.start_time) / 1000
               )}
             </div>
           </div>
