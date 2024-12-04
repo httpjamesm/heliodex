@@ -29,17 +29,21 @@
   const handleImport = async () => {
     try {
       importError = "";
-
       const filePath = await open({
-        filters: [
-          {
-            name: "CSV Files",
-            extensions: ["csv"],
-          },
-        ],
+        directory: false,
+        canCreateDirectories: false,
+        title: "Select CSV File",
       });
 
-      if (!filePath) return;
+      if (!filePath) {
+        throw new Error("No file selected");
+      }
+
+      // check file name
+      if (!filePath.endsWith(".csv")) {
+        throw new Error("File must have a .csv extension");
+      }
+
       const fileContent = await readTextFile(filePath);
       const lines = fileContent.trim().split("\n");
 
