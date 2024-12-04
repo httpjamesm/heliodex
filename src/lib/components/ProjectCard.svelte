@@ -1,15 +1,19 @@
 <script lang="ts">
-  import { IconArrowRight } from "@tabler/icons-svelte";
+  import { getProjectElapsedTime } from "$lib/db/migrations";
   import { selectedProject } from "$lib/stores/project";
+  import { IconArrowRight } from "@tabler/icons-svelte";
 
-  interface Props {
+  const {
+    name,
+    id,
+    onclick,
+  }: {
     name: string;
-    hours: number;
     id: number;
-    onclick?: () => void;
-  }
+    onclick: () => void;
+  } = $props();
 
-  const { name, hours, id, onclick }: Props = $props();
+  let hours = $state(0);
 
   const getColorFromName = (name: string) => {
     const hash = Array.from(name).reduce((acc, char) => {
@@ -20,53 +24,60 @@
     return `hsl(${h}, 70%, 50%)`;
   };
 
-  const color = $derived(getColorFromName(name));
-  const formattedHours = $derived(hours.toFixed(2));
-  const isActive = $derived($selectedProject?.id === id);
+  let color = $derived(getColorFromName(name));
+  let isActive = $derived($selectedProject?.id === id);
+
+  $effect(() => {
+    const loadTime = async () => {
+      const time = await getProjectElapsedTime(id);
+      hours = time / 3600;
+    };
+    loadTime();
+  });
 </script>
 
-<button class="card" class:active={isActive} {onclick}>
+<div class="project-card" class:active={isActive} on:click={onclick}>
   <div class="left">
     <div class="color-bar" style:background-color={color}></div>
     <div class="content">
       <h2>{name}</h2>
-      <p>{formattedHours} hours <span>so far</span></p>
+      <p>{hours.toFixed(1)} hours</p>
     </div>
   </div>
-  <div class="arrow"><IconArrowRight /></div>
-</button>
+  <div class="arrow">
+    <IconArrowRight />
+  </div>
+</div>
 
 <style lang="scss">
-  .card {
-    background: var(--surface-color);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    box-sizing: border-box;
-    margin: 0.5rem 0;
+  .project-card {
+    background-color: var(--surface-color);
+    border: 1px solid var(--surface-border-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
-    text-decoration: none;
-    color: inherit;
-    position: relative;
-    border: 1px solid var(--surface-border-color);
-    overflow: hidden;
-    width: 100%;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    margin: 0.5rem 0;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
     &.active {
       border-color: #2a9d8f;
       box-shadow: 0 0 0 1px #2a9d8f;
     }
+  }
 
-    .left {
-      text-align: left;
-      display: flex;
-      gap: 1rem;
-      flex: 1;
-    }
+  .left {
+    display: flex;
+    gap: 1rem;
+    flex: 1;
   }
 
   .color-bar {
@@ -79,26 +90,20 @@
     flex: 1;
 
     h2 {
-      font-size: 1.5rem;
-      font-weight: 600;
       margin: 0;
+      font-size: 1.25rem;
+      font-weight: 500;
     }
 
     p {
-      font-size: 1rem;
-      margin: 0.25rem 0 0;
-      color: white;
-
-      span {
-        color: #888;
-      }
+      margin: 0.5rem 0 0;
+      color: var(--text-secondary-color);
     }
   }
 
   .arrow {
     display: flex;
     align-items: center;
-    font-size: 1.5rem;
     opacity: 0.5;
   }
 </style>

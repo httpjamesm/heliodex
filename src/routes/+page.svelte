@@ -1,17 +1,29 @@
 <script lang="ts">
   import HomeArc from "$lib/components/HomeArc.svelte";
   import ProjectCard from "$lib/components/ProjectCard.svelte";
+  import type { Project } from "$lib/db/migrations";
+  import { getProjects } from "$lib/db/migrations";
+  import { onMount } from "svelte";
+
+  let recentProjects = $state<Project[]>([]);
+
+  //   get projects list and trim
+  onMount(async () => {
+    const projects = await getProjects();
+    recentProjects = projects.slice(0, 3);
+  });
 </script>
 
 <div class="home-arc-container">
-  <HomeArc />
+  <HomeArc></HomeArc>
 </div>
 
 <div class="wrapper">
   <div class="container">
     <h1>Let's get some<br />work done.</h1>
-    <ProjectCard name="Web Design Project" hours={5.34} />
-    <ProjectCard name="Blindr Project" hours={23.19} />
+    {#each recentProjects as project}
+      <ProjectCard name={project.name}></ProjectCard>
+    {/each}
   </div>
 </div>
 
@@ -37,7 +49,6 @@
         font-weight: 500;
         font-size: 48px;
         line-height: 45px;
-        /* or 94% */
         letter-spacing: -0.05em;
       }
     }

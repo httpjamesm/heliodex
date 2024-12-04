@@ -8,7 +8,6 @@
     addProject,
     type Project,
     getActiveLog,
-    getProjectElapsedTime,
   } from "$lib/db/migrations";
   import { onMount } from "svelte";
   import {
@@ -20,7 +19,6 @@
 
   let searchQuery = $state("");
   let projects = $state<Project[]>([]);
-  let projectTimes = $state<Record<number, number>>({});
   let isModalOpen = $state(false);
   let newProjectName = $state("");
 
@@ -32,9 +30,6 @@
 
   const loadProjects = async () => {
     projects = await getProjects();
-    for (const project of projects) {
-      projectTimes[project.id] = await getProjectElapsedTime(project.id);
-    }
   };
 
   const handleAddProject = async () => {
@@ -82,7 +77,6 @@
     {#each filteredProjects as project}
       <ProjectCard
         name={project.name}
-        hours={projectTimes[project.id] / 3600}
         id={project.id}
         onclick={() => selectProject(project)}
       />
