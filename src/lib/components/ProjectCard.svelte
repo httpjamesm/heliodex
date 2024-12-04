@@ -28,7 +28,7 @@
     disableDrawer?: boolean;
   } = $props();
 
-  let hours = $state(0);
+  let hours = $state<number | undefined>(undefined);
   let isDrawerOpen = $state(false);
   let pressTimer: number | undefined = $state(undefined);
   let isPressing = $state(false);
@@ -121,26 +121,28 @@
   onUnarchive={handleUnarchive}
 />
 
-<div
-  class="project-card"
-  class:active={isTracking}
-  class:pressing={isPressing}
-  class:archived
-  onpointerdown={handlePointerDown}
-  onpointerup={handlePointerUp}
-  onpointerleave={handlePointerLeave}
->
-  <div class="left">
-    <div class="color-bar" style:background-color={color}></div>
-    <div class="content">
-      <h2>{name}</h2>
-      <p>{hours.toFixed(1)} hours</p>
+{#if hours !== undefined}
+  <div
+    class="project-card"
+    class:active={isTracking}
+    class:pressing={isPressing}
+    class:archived
+    onpointerdown={handlePointerDown}
+    onpointerup={handlePointerUp}
+    onpointerleave={handlePointerLeave}
+  >
+    <div class="left">
+      <div class="color-bar" style:background-color={color}></div>
+      <div class="content">
+        <h2>{name}</h2>
+        <p>{hours.toFixed(1)} hours</p>
+      </div>
+    </div>
+    <div class="arrow">
+      <IconArrowRight />
     </div>
   </div>
-  <div class="arrow">
-    <IconArrowRight />
-  </div>
-</div>
+{/if}
 
 <style lang="scss">
   .project-card {
@@ -157,6 +159,8 @@
     margin: 0.5rem 0;
     touch-action: none;
     min-width: 0;
+    opacity: 0;
+    animation: fadeIn 0.2s ease forwards;
 
     &.active {
       border-color: #2a9d8f;
@@ -210,5 +214,16 @@
     display: flex;
     align-items: center;
     opacity: 0.5;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 </style>
