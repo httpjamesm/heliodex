@@ -1,5 +1,5 @@
 export enum Pages {
-  Landing = "/",
+  Landing = "/landing",
   Home = "/app",
   Track = "/app/track",
   Projects = "/app/projects",
