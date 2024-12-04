@@ -6,6 +6,7 @@
   import { getProjects } from "$lib/db/migrations";
   import { onMount } from "svelte";
   import Wave from "$lib/components/Wave.svelte";
+  import { goto } from "$app/navigation";
 </script>
 
 <div class="home-arc-container">
@@ -27,7 +28,7 @@
         class="track-button working"
         onclick={() => {
           window.localStorage.setItem("onboarding", "true");
-          navigate("/app");
+          goto("/app");
         }}
       >
         <div class="button-content">
