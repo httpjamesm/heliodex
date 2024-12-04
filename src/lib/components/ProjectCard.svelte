@@ -35,7 +35,7 @@
     border-radius: 1rem;
     padding: 1.5rem;
     box-sizing: border-box;
-    margin: 1rem 0;
+    margin: 0.5rem 0;
     display: flex;
     gap: 1rem;
     text-decoration: none;
