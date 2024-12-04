@@ -233,6 +233,14 @@ export const deleteTimeLog = async (id: number): Promise<void> => {
 
 export const archiveProject = async (id: number) => {
   await getDb().execute("UPDATE projects SET archived = 1 WHERE id = $1", [id]);
+  //   stop tracking this project as well
+  const hasOpenLog = await hasOpenTimeLog(id);
+  if (hasOpenLog) {
+    const openLog = await getActiveLog(id);
+    if (openLog) {
+      await stopTracking(openLog.id);
+    }
+  }
 };
 
 export const unarchiveProject = async (id: number) => {
